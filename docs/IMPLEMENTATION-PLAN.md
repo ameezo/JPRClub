@@ -9,15 +9,15 @@ Each milestone produces a working increment. No milestone is started until the p
 **Goal**: Migrate the selected prototype to React + TypeScript, preserving the approved visual identity.
 
 ### Deliverables
-- [ ] Vite + React + TypeScript project in `frontend/`.
-- [ ] Design tokens and shared CSS migrated from prototype.
-- [ ] Reusable components: `Navbar`, `Footer`, `SessionCard`, `PhotoGallery`, `LanguageToggle`.
-- [ ] Homepage reproducing Concept A (photos) layout exactly.
-- [ ] React Router routes: `/` (home), `/sessions`, `/studio`, `/resources`, `/journal`, `/about`.
-- [ ] i18n with react-i18next: EN default, AR toggle with RTL.
-- [ ] Google Fonts loaded: Inter + Noto Naskh Arabic.
-- [ ] Responsive mobile layout with collapsible navigation.
-- [ ] All data still hardcoded (same fictional content from prototype).
+- [x] Vite + React + TypeScript project in `frontend/`.
+- [x] Design tokens and shared CSS migrated from prototype.
+- [x] Reusable components: `Navbar`, `Footer`, `SessionCard`, `PhotoGallery`, `LanguageToggle`.
+- [x] Homepage reproducing Concept A (photos) layout exactly.
+- [x] React Router routes: `/` (home), `/sessions`, `/studio`, `/resources`, `/journal`, `/about`.
+- [x] i18n with react-i18next: EN default, AR toggle with RTL.
+- [x] Google Fonts loaded: Inter + Noto Naskh Arabic.
+- [x] Responsive mobile layout with collapsible navigation.
+- [x] All data still hardcoded (same fictional content from prototype).
 
 ### Verification
 - Side-by-side comparison: React homepage vs. original prototype.
