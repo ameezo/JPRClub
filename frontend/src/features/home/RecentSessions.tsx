@@ -1,48 +1,56 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SessionCard from '../../components/SessionCard';
+import { apiClient, type Session } from '@/lib/api';
 
 export default function RecentSessions() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fictional placeholder data
-  const sessions = [
-    {
-      id: "24",
-      date: "Sunday, Oct 8",
-      title: "News: Autumn Festivals",
-      titleAr: "أخبار: مهرجانات الخريف",
-      excerpt: "Reading NHK Easy News articles about traditional autumn matsuri.",
-      excerptAr: "قراءة مقالات من أخبار NHK المبسطة حول مهرجانات الخريف التقليدية."
-    },
-    {
-      id: "23",
-      date: "Sunday, Oct 1",
-      title: "Short Story: The Restaurant of Many Orders",
-      titleAr: "قصة قصيرة: مطعم الطلبات الكثيرة",
-      excerpt: "Analyzing Kenji Miyazawa's classic tale.",
-      excerptAr: "تحليل قصة كينجي ميازاوا الكلاسيكية."
-    },
-    {
-      id: "22",
-      date: "Sunday, Sep 24",
-      title: "Grammar Deep Dive: N4 Conditionals",
-      titleAr: "تعمق في القواعد: الشرط في مستوى N4",
-      excerpt: "Practice session focusing on ba, to, tara, and nara.",
-      excerptAr: "جلسة تدريب تركز على قواعد الشرط."
-    }
-  ];
+  useEffect(() => {
+    const fetchCompleted = async () => {
+      try {
+        const response = await apiClient.get('/sessions?status=completed&limit=3');
+        setSessions(response.data.items);
+      } catch (err) {
+        console.error('Failed to fetch recent sessions', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCompleted();
+  }, []);
+
+  if (loading || sessions.length === 0) return null;
 
   return (
-    <section className="section sessions-section">
+    <section className="section recent-sessions">
       <div className="section-header">
-        <h2>{t('home.pastSessions')}</h2>
+        <h3 className="section-title">{t('home.pastSessions')}</h3>
         <p>{t('home.catchUp')}</p>
       </div>
       
-      <div className="session-grid">
-        {sessions.map(session => (
-          <SessionCard key={session.id} {...session} />
-        ))}
+      <div className="cards-grid">
+        {sessions.map(session => {
+          const dateStr = new Date(session.scheduled_at).toLocaleDateString(
+            i18n.language === 'ar' ? 'ar-SA' : 'en-US',
+            { weekday: 'long', month: 'short', day: 'numeric' }
+          );
+          
+          return (
+            <SessionCard 
+              key={session.id} 
+              id={session.id}
+              date={dateStr}
+              title={session.title}
+              titleAr={session.title_ar}
+              excerpt={session.description}
+              excerptAr={session.description_ar}
+              linkBase="/studio"
+            />
+          );
+        })}
       </div>
     </section>
   );

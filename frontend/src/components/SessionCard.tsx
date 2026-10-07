@@ -18,14 +18,12 @@ export default function SessionCard({ id, date, title, titleAr, excerpt, excerpt
   const displayExcerpt = (isAr && excerptAr) ? excerptAr : excerpt;
 
   return (
-    <article className="session-card">
-      <div className="session-meta">
-        <span className="session-date">{date}</span>
-      </div>
-      <h3 className="session-title">{displayTitle}</h3>
-      <p className="session-excerpt">{displayExcerpt}</p>
-      <Link to={`/sessions/${id}`} className="read-more">
-        {t('home.readStudio')} <span>→</span>
+    <article className="card">
+      <div className="card-date">{date}</div>
+      <h4 className="card-title">{displayTitle}</h4>
+      <p className="card-excerpt">{displayExcerpt}</p>
+      <Link to={`/sessions/${id}`} className="card-link">
+        <span>{t('home.readStudio')}</span> <span>→</span>
       </Link>
     </article>
   );

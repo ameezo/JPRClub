@@ -1,16 +1,44 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PhotoGallery from '../../components/PhotoGallery';
+import { apiClient, getMediaUrl, type Session } from '@/lib/api';
 
 export default function Gallery() {
   const { t } = useTranslation();
+  const [photos, setPhotos] = useState<{ src: string; caption: string; captionAr?: string }[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fictional placeholder data for photos
-  const photos = [
-    { src: 'https://picsum.photos/400/300?random=1', caption: 'Session 22 Discussion', captionAr: 'نقاش الجلسة ٢٢' },
-    { src: 'https://picsum.photos/400/300?random=2', caption: 'Reading Group A', captionAr: 'مجموعة القراءة أ' },
-    { src: 'https://picsum.photos/400/300?random=3', caption: 'Vocabulary Practice', captionAr: 'التدرب على المفردات' },
-    { src: 'https://picsum.photos/400/300?random=4', caption: 'Coffee Break', captionAr: 'استراحة القهوة' }
-  ];
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const response = await apiClient.get('/sessions?status=completed&limit=5');
+        const sessions: Session[] = response.data.items;
+        
+        const extractedPhotos: { src: string; caption: string; captionAr?: string }[] = [];
+        sessions.forEach(session => {
+          if (session.gallery_images && session.gallery_images.length > 0) {
+            session.gallery_images.forEach(img => {
+              extractedPhotos.push({
+                src: getMediaUrl(img),
+                caption: session.title,
+                captionAr: session.title_ar
+              });
+            });
+          }
+        });
+        
+        // Take up to 6 photos for the home gallery
+        setPhotos(extractedPhotos.slice(0, 6));
+      } catch (err) {
+        console.error('Failed to fetch gallery', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGallery();
+  }, []);
+
+  if (loading || photos.length === 0) return null;
 
   return (
     <section className="section gallery-section">

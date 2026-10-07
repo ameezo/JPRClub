@@ -15,9 +15,9 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
   const isAr = i18n.language === 'ar';
 
   return (
-    <div className="photo-grid">
+    <div className="photo-gallery">
       {photos.map((photo, idx) => (
-        <figure className="gallery-item" key={idx}>
+        <figure key={idx}>
           <img src={photo.src} alt={(isAr && photo.captionAr) ? photo.captionAr : photo.caption} />
           <figcaption>
             {(isAr && photo.captionAr) ? photo.captionAr : photo.caption}
