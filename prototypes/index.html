@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JPR Club Prototypes</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 2rem; max-width: 900px; margin: 0 auto; line-height: 1.6; }
+        h1 { color: #333; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 1.5rem; }
+        a { display: block; padding: 1rem; background: #eee; color: #333; text-decoration: none; border-radius: 8px; font-weight: bold; width: 100%; box-sizing: border-box; text-align: center; transition: background 0.2s; }
+        a:hover { background: #ddd; }
+        .description { font-size: 0.9rem; color: #666; margin-top: 0.5rem; text-align: center; }
+        
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <h1>JPR Club Homepage Prototypes</h1>
+    <p>Select a concept below to view the prototype. Each prototype includes a language toggle (EN/AR) to demonstrate LTR/RTL support.</p>
+    
+    <div class="grid">
+        <div>
+            <h2>Without Photos</h2>
+            <ul>
+                <li>
+                    <a href="concept-a.html">Concept A: Cinematic Community</a>
+                    <div class="description">Full-width montage and integrated session panel.</div>
+                </li>
+                <li>
+                    <a href="concept-b.html">Concept B: Editorial Reading</a>
+                    <div class="description">Typography-led composition beside large media.</div>
+                </li>
+                <li>
+                    <a href="concept-c.html">Concept C: Session-First</a>
+                    <div class="description">Participation information is dominant, with immersive supporting media.</div>
+                </li>
+            </ul>
+        </div>
+        
+        <div>
+            <h2>With Photos</h2>
+            <ul>
+                <li>
+                    <a href="concept-a-photos.html">Concept A: Cinematic Community (With Photos)</a>
+                    <div class="description">Includes a community photo gallery section.</div>
+                </li>
+                <li>
+                    <a href="concept-b-photos.html">Concept B: Editorial Reading (With Photos)</a>
+                    <div class="description">Includes a community photo gallery section.</div>
+                </li>
+                <li>
+                    <a href="concept-c-photos.html">Concept C: Session-First (With Photos)</a>
+                    <div class="description">Includes a community photo gallery section.</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+/* Concept B Specific Styles */
+.hero-editorial {
+    display: flex;
+    min-height: 100vh;
+    background: var(--bg-color);
+}
+
+.editorial-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 10%;
+    position: relative;
+}
+
+.editorial-media {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+}
+
+.editorial-media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+}
+
+@media (max-width: 900px) {
+    .hero-editorial {
+        flex-direction: column;
+    }
+    .editorial-media {
+        min-height: 50vh;
+    }
+}
+
+.editorial-content .label {
+    font-size: 1rem;
+    color: var(--brand-blue);
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    position: relative;
+}
+.editorial-content .label::before {
+    content: "";
+    display: inline-block;
+    width: 40px;
+    height: 2px;
+    background: var(--brand-pink);
+    margin-right: 15px;
+    vertical-align: middle;
+}
+html[dir="rtl"] .editorial-content .label::before {
+    margin-right: 0;
+    margin-left: 15px;
+}
+
+.editorial-content h1 {
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    line-height: 1.1;
+    font-weight: 800;
+    margin: 0 0 1.5rem;
+    letter-spacing: -0.02em;
+}
+
+.editorial-content p {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    max-width: 500px;
+    margin-bottom: 3rem;
+    line-height: 1.6;
+}
+
+.resources-preview {
+    background: #fff;
+    border-top: 1px solid var(--surface-border);
+}
