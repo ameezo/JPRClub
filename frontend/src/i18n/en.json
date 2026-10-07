@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "sessions": "Sessions",
+    "studio": "Reading Studio",
+    "resources": "Resources",
+    "journal": "Journal",
+    "about": "About",
+    "reports": "Annual Reports",
+    "contact": "Contact",
+    "back": "Back"
+  },
+  "home": {
+    "nextSession": "Next Session",
+    "joinNext": "Join Next Session",
+    "pastSessions": "Past Sessions",
+    "catchUp": "Catch up on our past readings and discussions.",
+    "readStudio": "Reading Studio",
+    "communityGallery": "Community Gallery",
+    "glimpses": "Glimpses from our recent sessions."
+  }
+}
