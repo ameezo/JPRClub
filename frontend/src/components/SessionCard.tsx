@@ -8,9 +8,10 @@ interface SessionCardProps {
   titleAr?: string;
   excerpt: string;
   excerptAr?: string;
+  linkBase?: string;
 }
 
-export default function SessionCard({ id, date, title, titleAr, excerpt, excerptAr }: SessionCardProps) {
+export default function SessionCard({ id, date, title, titleAr, excerpt, excerptAr, linkBase = '/sessions' }: SessionCardProps) {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
 
@@ -22,7 +23,7 @@ export default function SessionCard({ id, date, title, titleAr, excerpt, excerpt
       <div className="card-date">{date}</div>
       <h4 className="card-title">{displayTitle}</h4>
       <p className="card-excerpt">{displayExcerpt}</p>
-      <Link to={`/sessions/${id}`} className="card-link">
+      <Link to={`${linkBase}/${id}`} className="card-link">
         <span>{t('home.readStudio')}</span> <span>→</span>
       </Link>
     </article>

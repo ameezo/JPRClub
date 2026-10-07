@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, Loader2, Link2, Plus, AlertCircle } from 'lucide-react';
+import { Upload, X, Loader2, AlertCircle } from 'lucide-react';
 import { uploadImage, uploadMultipleImages, getMediaUrl } from '@/lib/api';
 
 interface CoverUploaderProps {
@@ -10,7 +10,6 @@ interface CoverUploaderProps {
 export function CoverUploader({ coverUrl, onChange }: CoverUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const [showUrlInput, setShowUrlInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
@@ -119,8 +118,6 @@ interface GalleryUploaderProps {
 export function GalleryUploader({ images, onChange }: GalleryUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const [manualUrl, setManualUrl] = useState('');
-  const [showManualAdd, setShowManualAdd] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = async (fileList: FileList | File[]) => {
@@ -141,13 +138,6 @@ export function GalleryUploader({ images, onChange }: GalleryUploaderProps) {
 
   const removeImage = (indexToRemove: number) => {
     onChange(images.filter((_, idx) => idx !== indexToRemove));
-  };
-
-  const addManualUrl = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualUrl.trim()) return;
-    onChange([...images, manualUrl.trim()]);
-    setManualUrl('');
   };
 
   return (
