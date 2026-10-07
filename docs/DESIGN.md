@@ -1,45 +1,100 @@
-# Design Guidelines and Proposals
+# Design Specification — Approved Direction
 
-## Aesthetics & Inspiration
-* **Logo**: Use the provided logo (pink/pale-blue identity).
-* **Color Palette**: Restrained supporting surfaces to allow readable dark text alongside the pink/pale-blue identity.
-* **Composition**: Borrow the immersive imagery and strong composition from references like 42 Tokyo, but not their specific branding, colors, or exact layout.
-* **Multilingual Layout**: Support Arabic RTL and English LTR layouts.
+## Selected Concept
+**Concept A: Cinematic Community (with photos)**
+Selected on October 5, 2026.
 
-## Primary Homepage Purpose
-Help visitors join the next session.
+Alternative prototypes (B: Editorial Reading, C: Session-First, and all non-photo variants) are preserved in `prototypes/` as references. Do not mix them into the selected design.
 
-### Homepage Content Requirements
-1. **Hero Section**
-   * Next-session information.
-   * The current reading or discussion topic.
-   * A montage of actual club sessions (with a static fallback and video pause control).
-   * A clear participation button.
-   * *No splash screen, forced onboarding, or generic “Welcome” text.*
-2. **Recent Sessions**
-   * Three recent-session cards linking to session documentation in the Reading Studio.
-3. **Restrained Previews**
-   * Previews of relevant preparation/resources/journal content where appropriate.
-   * Avoid repetitive sections and empty filler.
-4. **Footer**
-   * Links: About, Annual reports, Contact.
+## Design Files (Current Prototype)
+| File | Purpose |
+|---|---|
+| `prototypes/concept-a-photos.html` | Selected homepage HTML |
+| `prototypes/css/shared.css` | Shared design tokens and components |
+| `prototypes/css/concept-a.css` | Concept A–specific hero and layout |
+| `prototypes/js/main.js` | Language toggle (EN/AR) |
 
-## Three Distinct Concepts
+## Color Palette
+| Token | Value | Usage |
+|---|---|---|
+| `--brand-pink` | `#f7a8b8` | Primary accent, buttons, highlights |
+| `--brand-pink-dark` | `#e88599` | Hover states, active links |
+| `--brand-blue` | `#a3c1e2` | Secondary accent, session labels, badges |
+| `--bg-color` | `#fdfdfd` | Page background |
+| `--text-color` | `#1a1a1a` | Primary text (dark, readable) |
+| `--text-muted` | `#666666` | Secondary text, excerpts |
+| `--surface` | `#ffffff` | Card and footer backgrounds |
+| `--surface-border` | `#eaeaea` | Card borders, section dividers |
 
-All concepts will use identical sample content, focusing differences on composition and hierarchy. Both desktop and mobile layouts will be provided.
+## Typography
+| Context | Font | Weight | Size |
+|---|---|---|---|
+| English body | Inter (system fallback: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto) | 400 | Base |
+| Arabic body (RTL) | Noto Naskh Arabic (system fallback) | 400 | Base |
+| Section titles | Inter | 700 | 2rem |
+| Card titles | Inter | 700 | 1.25rem |
+| Card labels | Inter | 700 | 0.85rem, uppercase, letter-spacing 0.05em |
+| Hero title | Inter | — | 2.5rem, line-height 1.2 |
+| Buttons | Inter | Bold | — |
 
-### A. Cinematic community
-* Full-width montage.
-* Integrated session panel.
+## Layout & Spacing
+| Element | Value |
+|---|---|
+| Page horizontal padding | 5% |
+| Section vertical padding | 5rem top/bottom |
+| Card padding | 2rem |
+| Card border-radius | 12px |
+| Button border-radius | 30px |
+| Card grid gap | 2rem |
+| Card grid columns | `repeat(auto-fit, minmax(300px, 1fr))` |
+| Photo gallery grid | `repeat(auto-fit, minmax(200px, 1fr))`, gap 1.5rem |
 
-### B. Editorial reading
-* Typography-led composition beside large media.
+## Hero Composition (Cinematic)
+* Full-viewport height (`100vh`), black background.
+* Background video with `opacity: 0.6`, `object-fit: cover`, centered with `translate(-50%, -50%)`.
+* Gradient overlay: `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.8) 100%)`.
+* Floating session panel: `background: rgba(255,255,255,0.95)`, `backdrop-filter: blur(10px)`, `border-radius: 16px`, `box-shadow: 0 20px 40px rgba(0,0,0,0.2)`, `max-width: 500px`, centered.
+* Static fallback: `poster` attribute on the `<video>` element (logo.jpeg).
 
-### C. Session-first
-* Participation information is dominant.
-* Immersive supporting media.
+## Session Cards
+* White surface, 1px border `#eaeaea`, 12px border-radius.
+* Hover: `translateY(-4px)` + `box-shadow: 0 12px 24px rgba(0,0,0,0.05)`.
+* Structure: date label (blue uppercase) → title → excerpt (muted) → "Reading Studio →" link (pink).
 
-## Media Rules
-* Provide a static media fallback and a video pause control.
-* Use clearly labeled fictional session data where real data is missing.
-* Do not invent footage or substitute unrelated stock imagery without explicitly labeling it as a placeholder.
+## Navigation
+| Item | Link |
+|---|---|
+| Sessions | Planned |
+| Reading Studio | Planned |
+| Resources | Planned |
+| Journal | Planned |
+
+* Nav is absolute-positioned over the hero, `z-index: 100`.
+* Dark variant (`.site-nav.dark`) uses white text for contrast over video.
+* Language toggle button: pill-shaped, border 1px, transparent background.
+
+## Arabic RTL Layout
+* `html[dir="rtl"]` triggers `font-family: "Noto Naskh Arabic"`.
+* Language visibility via `html[lang="en"] .lang-ar { display: none }` / `html[lang="ar"] .lang-en { display: none }`.
+* Arrow direction in card links: `transform: scaleX(-1)` in RTL.
+
+## Footer
+* Links: About, Annual Reports, Contact.
+* Flexbox, `justify-content: space-between`, wraps.
+* Top border `1px solid #eaeaea`.
+
+## Community Gallery Section
+* Photo grid with `figure` elements.
+* Image height: 200px, `object-fit: cover`, 8px border-radius.
+* Overlay caption at bottom: `background: rgba(0,0,0,0.6)`, `backdrop-filter: blur(2px)`.
+
+## Known Issues in Current Prototype
+| Issue | Details |
+|---|---|
+| All data is fictional | Session titles, dates, excerpts are hardcoded placeholder text |
+| All links are `href="#"` | No pages exist for Sessions, Studio, Resources, Journal, About, Annual Reports, Contact |
+| Photos use picsum.photos | External placeholder images, not real session photos |
+| Video is test footage | `JPRClub_test_video.mp4` — not real session montage |
+| No responsive nav | Navigation links don't collapse on mobile |
+| No Google Fonts loaded | Inter and Noto Naskh Arabic rely on system fallback only |
+| Resources/Journal section | Removed in photos variant (was present in non-photo Concept A) |

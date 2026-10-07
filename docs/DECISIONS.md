@@ -1,11 +1,52 @@
-# Decisions and Open Questions
+# Decisions Log
 
 ## Confirmed Decisions
-* **Implementation Phase**: Implementation has not started. Only design prototyping is currently active.
-* **Architecture**: No architecture or feature-to-file map is being designed for nonexistent code yet. Focus is strictly on HTML/CSS/JS frontend prototyping.
-* **Translation**: Content stays in its original language. The platform will not rely on automatic translation APIs.
 
-## Unresolved Items
-* **Final joining mechanism**: Currently a click action to redirect to the next session details. Alternatives include WhatsApp, email, or another approved flow.
-* **Session recordings**: Whether full session recordings will be hosted in the Studio.
-* **Final deployment**: Technical architecture and hosting deployment strategy.
+### Design
+| Decision | Date | Rationale |
+|---|---|---|
+| Selected Concept A (Cinematic Community) with photos | 2026-10-05 | User explicitly selected this direction |
+| Pink/pale-blue brand identity from logo | 2026-10-05 | Per original brief: use logo colors thoughtfully |
+| No splash screen or forced onboarding | 2026-10-05 | Per original brief |
+| No video pause button | 2026-10-05 | User requested removal |
+| Navigation: Sessions, Reading Studio, Resources, Journal | 2026-10-05 | User specified structure |
+| Photo gallery included on homepage | 2026-10-05 | User chose photos variant |
+| Footer: About, Annual Reports, Contact | 2026-10-05 | Per original brief |
+
+### Architecture
+| Decision | Date | Rationale |
+|---|---|---|
+| Monorepo: `frontend/` + `backend/` | 2026-10-07 | Per file2.md preference; simpler deployment |
+| Backend: Python + FastAPI | 2026-10-07 | User proposed; accepted — fast async, OpenAPI auto-docs |
+| Database: PostgreSQL | 2026-10-07 | User proposed; accepted — relational data, ACID compliance |
+| Frontend: React + TypeScript (Vite) | 2026-10-07 | Migrate from plain HTML prototype; provides component architecture needed for i18n, routing, and state management |
+| Deployment: Docker Compose | 2026-10-07 | User proposed; accepted |
+| Media: separate persistent volume | 2026-10-07 | User proposed; keeps uploads outside container lifecycle |
+
+### Content & Publishing
+| Decision | Date | Rationale |
+|---|---|---|
+| English default, Arabic alternative | 2026-10-05 | Per original brief |
+| No automatic translation | 2026-10-05 | Per original brief |
+| User articles stay in original language | 2026-10-05 | Per original brief |
+| Publishing requires admin/organizer approval | 2026-10-05 | Per publishing rules |
+| No organizers initially | 2026-10-05 | Per original brief |
+
+## Open Questions
+
+| Question | Context | Proposed Default |
+|---|---|---|
+| Joining mechanism | WhatsApp vs email vs other flow | Click redirects to session detail page |
+| Session recordings hosting | Where/whether to host full recordings | Defer; document as unresolved |
+| Visitor registration | No mandatory registration invented | Keep optional; configurable |
+| Arabic font loading | Currently system fallback only | Load Noto Naskh Arabic from Google Fonts |
+| Mobile navigation | No hamburger menu currently | Implement collapsible nav in React migration |
+
+## Explicitly Rejected
+| Item | Reason |
+|---|---|
+| Concept B (Editorial Reading) | Not selected by user |
+| Concept C (Session-First) | Not selected by user |
+| Automatic content translation | Explicitly prohibited in brief |
+| Placement tests, payments, sentence analyzer | Out of scope per brief |
+| Mandatory visitor registration | Prohibited per file2.md |

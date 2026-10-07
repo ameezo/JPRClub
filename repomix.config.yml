@@ -1,0 +1,38 @@
+# Repomix Configuration
+# Documentation: https://repomix.com
+
+output:
+  filePath: repomix-output.txt
+  style: markdown
+  showLineNumbers: true
+
+ignore:
+  useGitignore: true
+  useDefaultPatterns: true
+  customPatterns:
+    - "*.mov"
+    - "*.mp4"
+    - "*.pdf"
+    - "*.tar"
+    - "*.tar.gz"
+    - "*.zip"
+    - "*.jpeg"
+    - "*.jpg"
+    - "*.png"
+    - "*.PNG"
+    - "node_modules"
+    - "__pycache__"
+    - ".venv"
+    - "venv"
+    - ".env"
+    - ".env.local"
+    - ".env.production"
+    - "dist"
+    - "build"
+    - "repomix-output.*"
+    - ".aider*"
+    - "platfrom/"
+    - "Reading club /"
+
+security:
+  enableSecurityCheck: true
