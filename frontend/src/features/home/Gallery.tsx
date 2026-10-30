@@ -1,34 +1,37 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import PhotoGallery from '../../components/PhotoGallery';
+import PhotoGallery, { type Photo } from '../../components/PhotoGallery';
 import { apiClient, getMediaUrl, type Session } from '@/lib/api';
+import { extractSessionPhotos } from '@/lib/content-utils';
 
 export default function Gallery() {
   const { t } = useTranslation();
-  const [photos, setPhotos] = useState<{ src: string; caption: string; captionAr?: string }[]>([]);
+  const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const response = await apiClient.get('/sessions?status=completed&limit=5');
-        const sessions: Session[] = response.data.items;
+        const response = await apiClient.get('/sessions?status=completed&limit=50');
+        const sessions: Session[] = response.data.items || [];
         
-        const extractedPhotos: { src: string; caption: string; captionAr?: string }[] = [];
+        const extractedPhotos: Photo[] = [];
         sessions.forEach(session => {
-          if (session.gallery_images && session.gallery_images.length > 0) {
-            session.gallery_images.forEach(img => {
+          if (session.status === 'completed' && (session.documentation_status === 'published' || !session.documentation_status)) {
+            const items = extractSessionPhotos(session);
+            items.forEach(item => {
               extractedPhotos.push({
-                src: getMediaUrl(img),
-                caption: session.title,
-                captionAr: session.title_ar
+                src: getMediaUrl(item.url),
+                caption: item.sessionTitle,
+                captionAr: item.sessionTitleAr,
+                sessionId: item.sessionId,
               });
             });
           }
         });
         
-        // Take up to 6 photos for the home gallery
-        setPhotos(extractedPhotos.slice(0, 6));
+        // Take up to 24 recent photos for the home gallery single line
+        setPhotos(extractedPhotos.slice(0, 24));
       } catch (err) {
         console.error('Failed to fetch gallery', err);
       } finally {

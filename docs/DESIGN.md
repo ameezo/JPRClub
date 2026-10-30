@@ -79,9 +79,25 @@ Alternative prototypes (B: Editorial Reading, C: Session-First, and all non-phot
 * Arrow direction in card links: `transform: scaleX(-1)` in RTL.
 
 ## Footer
-* Links: About, Annual Reports, Contact.
-* Flexbox, `justify-content: space-between`, wraps.
-* Top border `1px solid #eaeaea`.
+* Links: About (`/about`), Annual Reports (`/reports`), Contact (`/about#connect`).
+* Compact social row: WhatsApp, Instagram, YouTube, Spotify.
+* Flexbox, `justify-content: space-between`, wraps cleanly on mobile.
+* Top border `1px solid var(--surface-border)`.
+
+## Page Layout & Header Clearance
+* Navigation (`.site-nav`) is absolute-positioned over the top with `z-index: 100`.
+* Public pages (Sessions, Studio, About, Resources, Reports) must use `.public-page-wrapper` or `.about-page-wrapper` with `padding-top: 7.5rem` (120px) on desktop and `6rem` (96px) on mobile to guarantee zero overlap between the header and page titles.
+* Anchor sections (such as `#connect` on `/about`) must define `scroll-margin-top: 6.5rem` (5.5rem on mobile) so target sections clear the header when scrolled into view.
+
+## About & Connect Page Specification
+* Route: `/about` (with `/about#connect` for contact/social destinations).
+* Language: Arabic default (RTL), English alternative (LTR).
+* Structure:
+  1. Compact hero introduction (Title, descriptor, 2 foundation paragraphs).
+  2. "What happens here" (3 responsive activity cards).
+  3. "What guides us" (compact principles card with 3 core beliefs).
+  4. "Explore the club" (3 navigation cards pointing to `/sessions`, `/studio`, `/reports`).
+  5. "Connect with us" (`#connect` anchor with 4 branded external action buttons).
 
 ## Community Gallery Section
 * Photo grid with `figure` elements.

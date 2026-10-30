@@ -9,7 +9,7 @@
 .markdown-content h3,
 .markdown-content h4 {
   color: #111827;
-  font-family: var(--sans);
+  font-family: var(--sans, system-ui, -apple-system, sans-serif);
   font-weight: 700;
   margin-top: 2em;
   margin-bottom: 1em;
@@ -21,13 +21,13 @@
 }
 
 .markdown-content h2 {
-  font-size: 1.875rem;
+  font-size: 1.75rem;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 0.5rem;
 }
 
 .markdown-content h3 {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
 }
 
 .markdown-content p {
@@ -47,6 +47,11 @@
   margin-bottom: 0.5em;
 }
 
+.markdown-content li strong {
+  color: #111827;
+  font-weight: 700;
+}
+
 .markdown-content ul {
   list-style-type: disc;
 }
@@ -57,11 +62,14 @@
 
 .markdown-content blockquote {
   font-style: italic;
-  color: #6b7280;
-  border-left: 4px solid #e5e7eb;
-  padding-left: 1em;
+  color: #4b5563;
+  border-left: 4px solid #f7a8b8;
+  background: #fdf2f4;
+  padding: 14px 20px;
+  border-radius: 6px;
   margin-top: 1.6em;
   margin-bottom: 1.6em;
+  line-height: 1.6;
 }
 
 .markdown-content hr {
@@ -136,9 +144,30 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
+/* Bidirectional Text Support: Automatically detect paragraph direction */
+.markdown-content p,
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content li,
+.markdown-content blockquote,
+.article-blocknote-viewer .bn-block-content,
+.article-blocknote-viewer .bn-inline-content,
+.article-blocknote-viewer p,
+.article-blocknote-viewer h1,
+.article-blocknote-viewer h2,
+.article-blocknote-viewer h3,
+.article-blocknote-viewer li,
+.article-blocknote-viewer blockquote {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
 /* RTL Support */
-.markdown-content[dir="rtl"] {
-  text-align: right;
+.markdown-content[dir="rtl"],
+.article-blocknote-viewer[dir="rtl"] {
+  font-family: 'Noto Naskh Arabic', 'Inter', system-ui, sans-serif;
 }
 
 .markdown-content[dir="rtl"] ul,
@@ -149,12 +178,11 @@
 
 .markdown-content[dir="rtl"] blockquote {
   border-left: none;
-  border-right: 4px solid #e5e7eb;
-  padding-left: 0;
-  padding-right: 1em;
+  border-right: 4px solid #f7a8b8;
+  padding-left: 14px;
+  padding-right: 20px;
 }
 
 .markdown-content[dir="rtl"] table {
   text-align: right;
 }
-

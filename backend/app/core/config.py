@@ -18,14 +18,17 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str = "admin12345"
 
     MEDIA_ROOT: str = "media"
+    REPORTING_TIMEZONE: str = "Asia/Amman"
 
     @property
     def cors_origins(self) -> List[str]:
         return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",") if origin.strip()]
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": True,
+        "extra": "ignore",
+    }
 
 
 settings = Settings()

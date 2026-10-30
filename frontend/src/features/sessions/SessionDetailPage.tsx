@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiClient, type Session } from '@/lib/api';
 import Container from '@/components/ui/Container';
-import Button from '@/components/ui/Button';
+import JoinDropdown from '@/components/JoinDropdown';
 import { Calendar, Clock, BookOpen, ArrowLeft } from 'lucide-react';
 
 export default function SessionDetailPage() {
@@ -50,8 +50,8 @@ export default function SessionDetailPage() {
           {t('nav.sessions') || "Back to Sessions"}
         </Link>
         
-        <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-gray-100 max-w-4xl mx-auto relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-accent" />
+        <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-gray-100 max-w-4xl mx-auto relative">
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-accent rounded-t-3xl" />
           
           <div className="flex flex-col md:flex-row gap-8 justify-between items-start mb-10">
             <div>
@@ -63,7 +63,7 @@ export default function SessionDetailPage() {
               </h1>
             </div>
             
-            <Button size="lg">{t('home.joinNext') || "Register Now"}</Button>
+            <JoinDropdown nextSession={session} align="end" />
           </div>
 
           <div className="grid sm:grid-cols-3 gap-4 mb-12">

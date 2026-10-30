@@ -10,6 +10,28 @@ export default function Hero() {
   const [nextSession, setNextSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    try {
+      const u = localStorage.getItem('user');
+      return u ? JSON.parse(u) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const syncAuth = () => {
+      try {
+        const u = localStorage.getItem('user');
+        setCurrentUser(u ? JSON.parse(u) : null);
+      } catch {
+        setCurrentUser(null);
+      }
+    };
+    window.addEventListener('storage', syncAuth);
+    return () => window.removeEventListener('storage', syncAuth);
+  }, []);
+
   useEffect(() => {
     async function fetchNextSession() {
       try {
@@ -39,12 +61,32 @@ export default function Hero() {
       </video>
       
       <div className="session-panel-integrated">
+        {currentUser?.name && (
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'rgba(232, 133, 153, 0.12)',
+            border: '1px solid rgba(232, 133, 153, 0.3)',
+            color: '#d46f83',
+            padding: '5px 14px',
+            borderRadius: '20px',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            marginBottom: '0.85rem'
+          }}>
+            <span>👋</span>
+            <span>{isAr ? `مرحباً، ${currentUser.name}` : `Welcome, ${currentUser.name}!`}</span>
+          </div>
+        )}
         <div className="label">{t('home.nextSession')}</div>
         {loading ? (
           <div style={{ padding: '2rem 0', textAlign: 'center' }}>Loading...</div>
         ) : nextSession ? (
           <>
-            <h2>{isAr && nextSession.title_ar ? nextSession.title_ar : nextSession.title}</h2>
+            <Link to={`/sessions/${nextSession.id}`} className="hero-session-title-link">
+              <h2>{isAr && nextSession.title_ar ? nextSession.title_ar : nextSession.title}</h2>
+            </Link>
             <div className="meta">
               {new Date(nextSession.scheduled_at).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', {
                 weekday: 'long', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
@@ -16,10 +16,15 @@ class SessionBase(BaseModel):
     duration_minutes: Optional[int] = None
     cover_image_url: Optional[str] = None
     studio_content: Optional[str] = None
+    studio_content_format: Optional[str] = "markdown"
+    documentation_status: Optional[str] = "none"
     gallery_images: Optional[list[str]] = None
+    exclude_from_reports: Optional[bool] = False
 
 class SessionCreate(SessionBase):
     idempotency_key: Optional[str] = None
+    publish_immediately: Optional[bool] = False
+    recurrence_months: Optional[int] = 1
 
 class SessionUpdate(BaseModel):
     title: Optional[str] = None
@@ -33,8 +38,21 @@ class SessionUpdate(BaseModel):
     duration_minutes: Optional[int] = None
     cover_image_url: Optional[str] = None
     studio_content: Optional[str] = None
+    studio_content_format: Optional[str] = None
+    documentation_status: Optional[str] = None
     gallery_images: Optional[list[str]] = None
-    version: int  # Required for optimistic locking
+    exclude_from_reports: Optional[bool] = None
+    version: Optional[int] = None  # Optional for optimistic locking
+
+class SessionDocumentationUpdate(BaseModel):
+    title: Optional[str] = None
+    title_ar: Optional[str] = None
+    studio_content: Optional[str] = None
+    studio_content_format: str = "blocknote"
+    cover_image_url: Optional[str] = None
+    gallery_images: Optional[list[str]] = None
+    documentation_status: Optional[str] = "draft"
+    version: Optional[int] = None
 
 class SessionResponse(SessionBase):
     id: UUID
@@ -44,6 +62,7 @@ class SessionResponse(SessionBase):
     updated_at: datetime
     published_at: Optional[datetime] = None
     version: int
+    exclude_from_reports: bool = False
 
     class Config:
         from_attributes = True
@@ -56,4 +75,3 @@ class SessionList(BaseModel):
 
 class NextSessionResponse(BaseModel):
     session: Optional[SessionResponse] = None
-

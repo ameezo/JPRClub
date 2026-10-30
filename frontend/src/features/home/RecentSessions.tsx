@@ -12,7 +12,12 @@ export default function RecentSessions() {
     const fetchCompleted = async () => {
       try {
         const response = await apiClient.get('/sessions?status=completed&limit=3');
-        setSessions(response.data.items);
+        let items = response.data.items || [];
+        if (items.length === 0) {
+          const fallback = await apiClient.get('/sessions?status=published&limit=3');
+          items = fallback.data.items || [];
+        }
+        setSessions(items);
       } catch (err) {
         console.error('Failed to fetch recent sessions', err);
       } finally {

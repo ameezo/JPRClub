@@ -3,13 +3,20 @@ from typing import Annotated, Any
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc, cast, Date
+from sqlalchemy import select, desc, cast, Date, func
 from sqlalchemy.exc import IntegrityError
 
 from app.db.database import get_db
 from app.models.user import User
 from app.models.session import Session, SessionStatus
-from app.schemas.session import SessionCreate, SessionUpdate, SessionResponse, SessionList, NextSessionResponse
+from app.schemas.session import (
+    SessionCreate,
+    SessionUpdate,
+    SessionDocumentationUpdate,
+    SessionResponse,
+    SessionList,
+    NextSessionResponse,
+)
 from app.core.dependencies import get_current_admin_or_organizer
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -18,6 +25,7 @@ router = APIRouter(prefix="/sessions", tags=["sessions"])
 async def list_sessions(
     db: Annotated[AsyncSession, Depends(get_db)],
     status: str = "published",
+    documentation_status: str | None = None,
     limit: int = 50,
     offset: int = 0,
     upcoming: bool = False
@@ -26,16 +34,20 @@ async def list_sessions(
     if status and status != "all":
         query = query.where(Session.status == status)
     
-    if upcoming:
-        query = query.where(Session.scheduled_at > datetime.now(timezone.utc))
+    if documentation_status:
+        query = query.where(Session.documentation_status == documentation_status)
+
+    now = datetime.now(timezone.utc)
+    if upcoming or (status == "published" and not documentation_status):
+        query = query.where(
+            (Session.scheduled_at + func.make_interval(0, 0, 0, 0, 0, func.coalesce(Session.duration_minutes, 90))) > now
+        )
         
     query = query.order_by(desc(Session.scheduled_at)).offset(offset).limit(limit)
     
     result = await db.execute(query)
     sessions = result.scalars().all()
     
-    # We should normally count without limits, but for simplicity here we return length
-    # A true total would need a separate count() query.
     return {
         "items": sessions,
         "total": len(sessions),
@@ -47,9 +59,10 @@ async def list_sessions(
 async def get_next_session(
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Any:
+    now = datetime.now(timezone.utc)
     query = select(Session)\
         .where(Session.status == "published")\
-        .where(Session.scheduled_at > datetime.now(timezone.utc))\
+        .where((Session.scheduled_at + func.make_interval(0, 0, 0, 0, 0, func.coalesce(Session.duration_minutes, 90))) > now)\
         .order_by(Session.scheduled_at.asc())\
         .limit(1)
         
@@ -93,8 +106,13 @@ async def create_session(
     if duplicate_result.scalars().first():
         raise HTTPException(status_code=409, detail="A session with this title is already scheduled for this day.")
 
+    create_data = session_in.model_dump(exclude={"idempotency_key", "publish_immediately", "recurrence_months"})
+    initial_status = SessionStatus.published if session_in.publish_immediately else SessionStatus.draft
+    now = datetime.now(timezone.utc)
     new_session = Session(
-        **session_in.model_dump(exclude={"idempotency_key"}),
+        **create_data,
+        status=initial_status,
+        published_at=now if initial_status == SessionStatus.published else None,
         idempotency_key=session_in.idempotency_key,
         created_by=current_user.id
     )
@@ -108,6 +126,7 @@ async def create_session(
         
     return new_session
 
+@router.put("/{id}", response_model=SessionResponse)
 @router.patch("/{id}", response_model=SessionResponse)
 async def update_session(
     id: UUID,
@@ -121,7 +140,7 @@ async def update_session(
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
         
-    if session.version != session_in.version:
+    if session_in.version is not None and session.version != session_in.version:
         raise HTTPException(
             status_code=409, 
             detail={
@@ -146,6 +165,8 @@ async def update_session(
     return session
 
 @router.post("/{id}/publish", response_model=SessionResponse)
+@router.put("/{id}/publish", response_model=SessionResponse)
+@router.patch("/{id}/publish", response_model=SessionResponse)
 async def publish_session(
     id: UUID,
     current_user: Annotated[User, Depends(get_current_admin_or_organizer)],
@@ -157,6 +178,9 @@ async def publish_session(
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
         
+    if session.status == SessionStatus.published:
+        return session
+
     if session.status != SessionStatus.draft:
         raise HTTPException(status_code=400, detail="Only drafts can be published")
         
@@ -201,8 +225,130 @@ async def complete_session(
     await db.refresh(session)
     return session
 
+@router.post("/{id}/complete-and-document", response_model=SessionResponse)
+async def complete_and_document_session(
+    id: UUID,
+    current_user: Annotated[User, Depends(get_current_admin_or_organizer)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+) -> Any:
+    result = await db.execute(select(Session).where(Session.id == id))
+    session = result.scalars().first()
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    session.status = SessionStatus.completed
+    if session.documentation_status == "none":
+        session.documentation_status = "draft"
+        
+    await db.commit()
+    await db.refresh(session)
+    return session
+
+@router.patch("/{id}/documentation", response_model=SessionResponse)
+async def update_session_documentation(
+    id: UUID,
+    doc_in: SessionDocumentationUpdate,
+    current_user: Annotated[User, Depends(get_current_admin_or_organizer)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+) -> Any:
+    result = await db.execute(select(Session).where(Session.id == id))
+    session = result.scalars().first()
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    if doc_in.version is not None and doc_in.version != session.version:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Conflict: Session documentation was modified by another request. Please refresh and try again."
+        )
+
+    if doc_in.title is not None:
+        session.title = doc_in.title
+    if doc_in.title_ar is not None:
+        session.title_ar = doc_in.title_ar
+    if doc_in.studio_content is not None:
+        session.studio_content = doc_in.studio_content
+    if doc_in.studio_content_format:
+        session.studio_content_format = doc_in.studio_content_format
+    if doc_in.cover_image_url is not None:
+        session.cover_image_url = doc_in.cover_image_url
+    if doc_in.gallery_images is not None:
+        session.gallery_images = doc_in.gallery_images
+    elif session.studio_content:
+        try:
+            import json
+            blocks = json.loads(session.studio_content)
+            extracted_imgs = []
+            if isinstance(blocks, list):
+                for b in blocks:
+                    if isinstance(b, dict) and b.get("type") == "gallery":
+                        props = b.get("props", {})
+                        raw_imgs = props.get("images", "[]")
+                        img_list = json.loads(raw_imgs) if isinstance(raw_imgs, str) else raw_imgs
+                        if isinstance(img_list, list):
+                            for item in img_list:
+                                if isinstance(item, dict) and item.get("url"):
+                                    extracted_imgs.append(item["url"])
+                                elif isinstance(item, str):
+                                    extracted_imgs.append(item)
+            if extracted_imgs:
+                current = session.gallery_images or []
+                merged = list(dict.fromkeys(current + extracted_imgs))
+                session.gallery_images = merged
+        except Exception:
+            pass
+
+    if doc_in.documentation_status is not None:
+        session.documentation_status = doc_in.documentation_status
+    elif session.documentation_status == "none":
+        session.documentation_status = "draft"
+
+    await db.commit()
+    await db.refresh(session)
+    return session
+
+@router.post("/{id}/publish-studio", response_model=SessionResponse)
+async def publish_session_studio(
+    id: UUID,
+    current_user: Annotated[User, Depends(get_current_admin_or_organizer)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+) -> Any:
+    result = await db.execute(select(Session).where(Session.id == id))
+    session = result.scalars().first()
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session.status = SessionStatus.completed
+    session.documentation_status = "published"
+    if not session.published_at:
+        session.published_at = datetime.now(timezone.utc)
+
+    await db.commit()
+    await db.refresh(session)
+    return session
+
+@router.post("/{id}/unpublish-studio", response_model=SessionResponse)
+async def unpublish_session_studio(
+    id: UUID,
+    current_user: Annotated[User, Depends(get_current_admin_or_organizer)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+) -> Any:
+    result = await db.execute(select(Session).where(Session.id == id))
+    session = result.scalars().first()
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session.documentation_status = "draft"
+    await db.commit()
+    await db.refresh(session)
+    return session
+
 @router.delete("/{id}", status_code=204)
-async def delete_draft_session(
+async def delete_session(
     id: UUID,
     current_user: Annotated[User, Depends(get_current_admin_or_organizer)],
     db: Annotated[AsyncSession, Depends(get_db)]
@@ -212,9 +358,6 @@ async def delete_draft_session(
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-        
-    if session.status != SessionStatus.draft:
-        raise HTTPException(status_code=400, detail="Only draft sessions can be deleted")
         
     await db.delete(session)
     await db.commit()

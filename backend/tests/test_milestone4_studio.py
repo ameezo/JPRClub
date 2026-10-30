@@ -73,12 +73,20 @@ async def test_milestone4_reading_studio_flow():
         assert patch_res.status_code == 200
         assert "Updated Notes" in patch_res.json()["studio_content"]
 
-        # Teardown / Cleanup
-        from app.db.database import AsyncSessionLocal
-        from app.models.session import Session
-        from uuid import UUID
-        async with AsyncSessionLocal() as session:
-            s = await session.get(Session, UUID(session_id))
-            if s:
-                await session.delete(s)
-                await session.commit()
+        # 7. Publish Studio documentation
+        pub_studio_res = await ac.post(f"/api/sessions/{session_id}/publish-studio", headers=headers)
+        assert pub_studio_res.status_code == 200
+        assert pub_studio_res.json()["documentation_status"] == "published"
+
+        # 8. Unpublish Studio documentation back to draft
+        unpub_res = await ac.post(f"/api/sessions/{session_id}/unpublish-studio", headers=headers)
+        assert unpub_res.status_code == 200
+        assert unpub_res.json()["documentation_status"] == "draft"
+
+        # 9. Delete session via admin DELETE endpoint
+        del_res = await ac.delete(f"/api/sessions/{session_id}", headers=headers)
+        assert del_res.status_code == 204
+
+        # Verify session is deleted
+        get_res = await ac.get(f"/api/sessions/{session_id}")
+        assert get_res.status_code == 404

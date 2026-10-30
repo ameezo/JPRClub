@@ -2,6 +2,7 @@
   "nav": {
     "sessions": "Sessions",
     "studio": "Reading Studio",
+    "gallery": "Gallery",
     "resources": "Resources",
     "journal": "Journal",
     "about": "About",
@@ -17,5 +18,132 @@
     "readStudio": "Reading Studio",
     "communityGallery": "Community Gallery",
     "glimpses": "Glimpses from our recent sessions."
+  },
+  "join": {
+    "chooseOption": "Choose How You Want to Join",
+    "attendance": "Attendance",
+    "attendanceDesc": "Join our activities, events, and reading circles",
+    "volunteer": "Volunteer",
+    "volunteerDesc": "Help us prepare and organize our sessions",
+    "team": "Join Our Team",
+    "teamDesc": "Become part of the core organizing team",
+    "instructor": "Presenter / Instructor",
+    "instructorDesc": "Share an idea or introduce a topic during the session",
+    "formTitle": {
+      "volunteer": "Volunteer with Us",
+      "team": "Join the Core Team",
+      "instructor": "Present or Share an Idea"
+    },
+    "formDesc": {
+      "volunteer": "Fill in your details to help us prepare and coordinate upcoming sessions.",
+      "team": "Fill in your details and tell us about your vision to join the core JPR Club team.",
+      "instructor": "Have an idea or topic you want to present? Tell us what you would like to share."
+    },
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "e.g. John Doe",
+    "email": "Email Address",
+    "emailPlaceholder": "name@example.com",
+    "phone": "Phone Number",
+    "phonePlaceholder": "e.g. +962 7 9000 0000",
+    "messageLabel": {
+      "volunteer": "Brief About Yourself & How You Can Help",
+      "team": "Brief About Yourself & Your Ideas for the Team",
+      "instructor": "Idea / Topic / Suggestion You Want to Share"
+    },
+    "messagePlaceholder": {
+      "volunteer": "Write a short brief about yourself, your skills, and how you'd like to help...",
+      "team": "Tell us about yourself, your background, and ideas you would like to bring to the team...",
+      "instructor": "Describe your idea or topic you'd like to share in front of the group..."
+    },
+    "applyingForSession": "Target Session",
+    "generalApplication": "General Application / Any Session",
+    "submit": "Submit Application",
+    "submitting": "Submitting...",
+    "successTitle": "Thank You!",
+    "successMessage": "Your submission has been received. Our team will review your application and reach out to you soon.",
+    "joinWhatsappNow": "Join WhatsApp Group Now",
+    "backHome": "Back to Home",
+    "backSessions": "Back to Sessions"
+  },
+  "about": {
+    "pageTitle": "About Japanese Reading Club",
+    "shortDescriptor": "Read together. Exchange languages and ideas.",
+    "introP1": "Japanese Reading Club (JPR Club) began in Jordan on September 11, 2024, as an independent initiative by Japanese-language learners. Its starting idea was simple: make reading an enjoyable way to develop language skills and understand texts, without the pressure of traditional study.",
+    "introP2": "Today, the club brings together Japanese learners and people who enjoy reading, and welcomes Japanese participants interested in language and cultural exchange. Japanese is our starting point, and we also read and discuss material in Arabic and English through in-person and online sessions.",
+    "whatWeDo": {
+      "title": "What happens here",
+      "card1Title": "Read and understand together",
+      "card1Desc": "We select material suited to participants—from graded readers and manga to short stories, novels, and news—and explore its meaning, vocabulary, and language points together.",
+      "card2Title": "Exchange ideas",
+      "card2Desc": "We ask questions, share impressions, and explore different perspectives in a supportive setting. You do not need to understand every word before joining a discussion.",
+      "card3Title": "Keep the learning accessible",
+      "card3Desc": "Our Reading Studio brings together session summaries, photographs, and notes so participants can revisit what we explored and keep learning."
+    },
+    "principles": {
+      "title": "What guides us",
+      "item1": "Small, consistent steps can create a larger impact.",
+      "item2": "Asking questions and participating open possibilities for learning and connection.",
+      "item3": "Ideas do not need to be perfect before being shared; they improve through experience and feedback."
+    },
+    "explore": {
+      "title": "Explore the club",
+      "sessionsTitle": "Upcoming sessions",
+      "sessionsDesc": "see what we are reading and how to participate.",
+      "studioTitle": "Reading Studio",
+      "studioDesc": "revisit what we have read and discussed.",
+      "reportsTitle": "Annual reports",
+      "reportsDesc": "explore more detailed documentation of our activities and journey."
+    },
+    "connect": {
+      "title": "Connect with us",
+      "lead": "Join the WhatsApp group to participate and follow club updates. You can also explore our Instagram posts, visit the YouTube channel, and listen to the podcast on Spotify.",
+      "whatsapp": "Join the WhatsApp group",
+      "instagram": "Follow on Instagram",
+      "youtube": "Watch on YouTube",
+      "spotify": "Listen on Spotify"
+    }
+  },
+  "footer": {
+    "rights": "© 2026 Japanese Reading Club",
+    "social": {
+      "whatsapp": "WhatsApp Group",
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "spotify": "Spotify"
+    }
+  },
+  "admin": {
+    "interests": "Join Requests",
+    "resources": "Resources"
+  },
+  "resources": {
+    "title": "Resources & Guides",
+    "subtitle": "Carefully selected podcasts, reading materials, YouTube channels, and grammar references for Japanese learners.",
+    "filterCategory": "Category",
+    "filterLevel": "Level",
+    "allCategories": "All Categories",
+    "allLevels": "All Levels",
+    "categories": {
+      "podcast": "Podcast",
+      "reading": "Reading",
+      "youtube": "YouTube",
+      "websites": "Websites",
+      "grammar": "Grammar",
+      "hiragana_katakana": "Hiragana & Katakana"
+    },
+    "levels": {
+      "starter": "Starter",
+      "jlpt": "JLPT",
+      "all_levels": "All Levels",
+      "arabic_learner": "Arabic Learner"
+    },
+    "searchPlaceholder": "Search resources by name or topic...",
+    "openResource": "Visit Resource",
+    "addResource": "Add Resource",
+    "editResource": "Edit",
+    "deleteResource": "Delete",
+    "recommendedBadge": "Mais Recommended",
+    "noResults": "No resources match your filters.",
+    "clearFilters": "Clear all filters"
   }
 }

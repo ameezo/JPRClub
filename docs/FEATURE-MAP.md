@@ -51,14 +51,16 @@
 | Draft creation (verified member) | 🔲 Planned | `features/journal/ArticleEditor.tsx` | `api/journal.py` → `POST /api/journal` |
 | Approval workflow | 🔲 Planned | `features/management/ReviewQueue.tsx` | `services/publishing.py` |
 
-## Resources / About / Annual Reports
+## Resources / About / Annual Reports / Connect
 
-| Feature | Status | Frontend Files | Backend Files |
-|---|---|---|---|
-| Resources page | 🔲 Planned | `features/resources/ResourcesPage.tsx` | TBD |
-| About page | 🔲 Planned | `features/about/AboutPage.tsx` | — (static content) |
-| Annual Reports | 🔲 Planned | `features/about/AnnualReports.tsx` | — (PDF download) |
-| Contact | 🔲 Planned | `components/Footer.tsx` | — |
+| Feature | Status | Frontend Files | Backend Files | Notes |
+|---|---|---|---|---|
+| Resources page | ✅ Implemented | `features/resources/ResourcesPage.tsx` | — | Language and grammar resources |
+| About page | ✅ Implemented | `features/about/AboutPage.tsx` | — | Bilingual (AR default / EN), 5 compact sections per file5.md |
+| Contact / Connect | ✅ Implemented | `features/about/AboutPage.tsx` (`#connect`), `components/Footer.tsx`, `lib/links.ts` | — | Anchor `/about#connect`, 4 official destinations (WhatsApp, Instagram, YouTube, Spotify) |
+| Annual Reports (Public Archive & Online Viewer) | ✅ Implemented | `features/reports/ReportsPage.tsx`, `features/reports/ReportViewPage.tsx` | `api/reports.py` → `GET /api/reports`, `GET /api/reports/{year}` | Public listing with fixed navbar clearance, interactive snapshot viewer, downloadable vector PDFs, and archived legacy editions |
+| Annual Reports Management & Publication Gate | ✅ Implemented | `features/admin/AdminReportsPage.tsx`, `layouts/AdminLayout.tsx` | `api/reports.py`, `services/report_engine.py`, `services/pdf_generator.py` | Missing-data quality audit checklist, deterministic draft engine, SHA-256 snapshot hashing, ReportLab vector PDF generator, manual publication gate |
+| Post-Session Metrics & Feedback Entry | ✅ Implemented | `features/admin/SessionMetricsPanel.tsx`, `features/admin/SessionDocumentPage.tsx` | `models/session_metrics.py`, `api/session_metrics.py`, `schemas/session_metrics.py` | Attendance visits (null vs 0), modality split, counting method, feedback tallies, reviewed quotes, optimistic locking |
 
 ## Authentication & Permissions
 

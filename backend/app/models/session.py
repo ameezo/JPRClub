@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Integer, DateTime, ForeignKey, Enum, Text, JSON
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Integer, DateTime, ForeignKey, Enum, Text, JSON, Boolean
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from app.db.database import Base
@@ -30,8 +30,13 @@ class Session(Base):
     status: Mapped[SessionStatus] = mapped_column(Enum(SessionStatus), default=SessionStatus.draft, nullable=False)
     cover_image_url: Mapped[str | None] = mapped_column(String, nullable=True)
     studio_content: Mapped[str | None] = mapped_column(Text, nullable=True)
+    studio_content_format: Mapped[str] = mapped_column(String, default="markdown", nullable=False)
+    documentation_status: Mapped[str] = mapped_column(String, default="none", nullable=False)
     gallery_images: Mapped[list | None] = mapped_column(JSON, nullable=True, default=list)
     
+    # Explicit flag for excluding test/demo sessions from annual reports
+    exclude_from_reports: Mapped[bool] = mapped_column(Boolean, default=False, server_default=func.false(), nullable=False)
+
     idempotency_key: Mapped[str | None] = mapped_column(String, unique=True, nullable=True)
     
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
@@ -44,3 +49,6 @@ class Session(Base):
     __mapper_args__ = {
         "version_id_col": version
     }
+
+    metrics = relationship("SessionMetrics", back_populates="session", uselist=False, cascade="all, delete-orphan")
+    quotes = relationship("FeedbackQuote", back_populates="session", cascade="all, delete-orphan")

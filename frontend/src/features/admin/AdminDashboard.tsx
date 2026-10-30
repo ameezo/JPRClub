@@ -11,10 +11,12 @@ import {
   ExternalLink,
   Sparkles,
   Camera,
-  Calendar
+  Calendar,
+  Trash2,
+  RotateCcw,
+  Users
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import Button from '@/components/ui/Button';
 
 export default function AdminDashboard() {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -39,18 +41,11 @@ export default function AdminDashboard() {
   }, []);
 
   const handleCompleteSession = async (session: Session) => {
-    if (!confirm(`Mark "${session.title}" as completed?`)) return;
+    if (!confirm(`Mark "${session.title}" as completed and open Studio documenter?`)) return;
     
     try {
-      await apiClient.post(`/sessions/${session.id}/complete`);
-      const wantsToDocument = confirm(
-        'Session marked as completed! 🎉\n\nWould you like to document the Reading Studio notes, summary, and upload photos now?'
-      );
-      if (wantsToDocument) {
-        navigate(`/admin/sessions/${session.id}/edit`);
-      } else {
-        fetchSessions();
-      }
+      await apiClient.post(`/sessions/${session.id}/complete-and-document`);
+      navigate(`/admin/sessions/${session.id}/document`);
     } catch (err) {
       alert('Failed to complete session');
     }
@@ -66,61 +61,87 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteSession = async (session: Session) => {
+    if (!confirm(`Are you sure you want to permanently delete session "${session.title}"? This cannot be undone.`)) return;
+    try {
+      await apiClient.delete(`/sessions/${session.id}`);
+      fetchSessions();
+    } catch (err) {
+      console.error('Delete session error:', err);
+      alert('Failed to delete session.');
+    }
+  };
+
+  const handleUnpublishStudio = async (session: Session) => {
+    if (!confirm(`Unpublish Studio documentation for "${session.title}" back to draft? It will be removed from the public Reading Studio.`)) return;
+    try {
+      await apiClient.post(`/sessions/${session.id}/unpublish-studio`);
+      fetchSessions();
+    } catch (err) {
+      console.error('Unpublish error:', err);
+      alert('Failed to unpublish studio documentation.');
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch(status) {
-      case 'published': return <CheckCircle2 className="w-5 h-5 text-green-500" />;
-      case 'draft': return <FileText className="w-5 h-5 text-gray-400" />;
-      case 'cancelled': return <XCircle className="w-5 h-5 text-red-500" />;
-      case 'completed': return <CheckCheck className="w-5 h-5 text-blue-500" />;
+      case 'published': return <CheckCircle2 style={{ width: '18px', height: '18px', color: '#16a34a' }} />;
+      case 'draft': return <FileText style={{ width: '18px', height: '18px', color: '#9ca3af' }} />;
+      case 'cancelled': return <XCircle style={{ width: '18px', height: '18px', color: '#dc2626' }} />;
+      case 'completed': return <CheckCheck style={{ width: '18px', height: '18px', color: '#2563eb' }} />;
       default: return null;
     }
   };
 
+  const upcomingSessions = sessions.filter(s => s.status === 'published');
+  const studioPublishedSessions = sessions.filter(s => s.status === 'completed' && s.documentation_status === 'published');
+  const draftSessions = sessions.filter(s => s.status === 'draft' || s.documentation_status === 'draft');
+
   const filteredSessions = sessions.filter(s => {
     if (filter === 'all') return true;
-    return s.status === filter;
+    if (filter === 'published') return s.status === 'published';
+    if (filter === 'completed') return s.status === 'completed' && s.documentation_status === 'published';
+    if (filter === 'draft') return s.status === 'draft' || s.documentation_status === 'draft';
+    return true;
   });
 
   const completedWithoutStudio = sessions.filter(
-    s => s.status === 'completed' && (!s.studio_content && (!s.gallery_images || s.gallery_images.length === 0))
+    s => s.status === 'completed' && s.documentation_status !== 'published'
   );
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Schedule reading sessions, document discussions, and upload gallery photos
-          </p>
+      <div className="admin-dashboard-header">
+        <div className="admin-dashboard-title-group">
+          <h1>Admin Dashboard</h1>
+          <p>Schedule reading sessions, document discussions, and upload gallery photos</p>
         </div>
         
-        <Button as={Link} to="/admin/sessions/new" className="flex items-center gap-2 w-full sm:w-auto justify-center shadow-md">
-          <Plus className="w-4 h-4" />
-          Schedule New Session
-        </Button>
+        <Link to="/admin/sessions/new" className="admin-btn-schedule">
+          <Plus style={{ width: '16px', height: '16px' }} />
+          <span>Schedule New Session</span>
+        </Link>
       </div>
 
-      {/* Post-Session Action Callout if there are completed sessions missing documentation */}
+      {/* Post-Session Action Callout */}
       {completedWithoutStudio.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-              <Camera className="w-5 h-5" />
-            </div>
+        <div className="admin-info-box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Camera style={{ width: '22px', height: '22px', color: '#b45309', flexShrink: 0 }} />
             <div>
-              <h3 className="font-semibold text-amber-900 text-sm sm:text-base">
+              <div style={{ fontWeight: 600, fontSize: '14px', color: '#92400e' }}>
                 {completedWithoutStudio.length} Completed {completedWithoutStudio.length === 1 ? 'Session Needs' : 'Sessions Need'} Studio Documentation
-              </h3>
-              <p className="text-xs sm:text-sm text-amber-700 mt-0.5">
+              </div>
+              <div style={{ fontSize: '13px', color: '#92400e', marginTop: '2px' }}>
                 The session ended! Add summary points, vocabulary, and drag & drop photos from the event.
-              </p>
+              </div>
             </div>
           </div>
           <Link
-            to={`/admin/sessions/${completedWithoutStudio[0].id}/edit`}
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-sm transition-colors whitespace-nowrap"
+            to={`/admin/sessions/${completedWithoutStudio[0].id}/document`}
+            className="admin-action-btn"
+            style={{ backgroundColor: '#fef3c7', borderColor: '#fcd34d', color: '#92400e', fontWeight: 600 }}
           >
             Document "{completedWithoutStudio[0].title.slice(0, 20)}..."
           </Link>
@@ -128,94 +149,82 @@ export default function AdminDashboard() {
       )}
 
       {/* Main Content Card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="admin-list-card">
         {/* Filter Tabs */}
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-medium overflow-x-auto pb-1 sm:pb-0">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
-                filter === 'all' ? 'bg-primary text-white font-semibold' : 'text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              All ({sessions.length})
-            </button>
-            <button
-              onClick={() => setFilter('published')}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
-                filter === 'published' ? 'bg-primary text-white font-semibold' : 'text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Upcoming ({sessions.filter(s => s.status === 'published').length})
-            </button>
-            <button
-              onClick={() => setFilter('completed')}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
-                filter === 'completed' ? 'bg-primary text-white font-semibold' : 'text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Completed / Studio ({sessions.filter(s => s.status === 'completed').length})
-            </button>
-            <button
-              onClick={() => setFilter('draft')}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
-                filter === 'draft' ? 'bg-primary text-white font-semibold' : 'text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Drafts ({sessions.filter(s => s.status === 'draft').length})
-            </button>
-          </div>
+        <div className="admin-filter-tabs">
+          <button
+            onClick={() => setFilter('all')}
+            className={`admin-filter-tab ${filter === 'all' ? 'active' : ''}`}
+          >
+            All ({sessions.length})
+          </button>
+          <button
+            onClick={() => setFilter('published')}
+            className={`admin-filter-tab ${filter === 'published' ? 'active' : ''}`}
+          >
+            Upcoming ({upcomingSessions.length})
+          </button>
+          <button
+            onClick={() => setFilter('completed')}
+            className={`admin-filter-tab ${filter === 'completed' ? 'active' : ''}`}
+          >
+            Completed / Studio ({studioPublishedSessions.length})
+          </button>
+          <button
+            onClick={() => setFilter('draft')}
+            className={`admin-filter-tab ${filter === 'draft' ? 'active' : ''}`}
+          >
+            Drafts ({draftSessions.length})
+          </button>
         </div>
         
         {loading ? (
-          <div className="p-12 text-center text-gray-500 font-medium">Loading sessions...</div>
+          <div style={{ padding: '48px', textAlign: 'center', color: '#6b7280', fontWeight: 500 }}>
+            Loading sessions...
+          </div>
         ) : filteredSessions.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            <Calendar className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="font-semibold text-gray-700">No sessions match this filter</p>
-            <p className="text-xs text-gray-400 mt-1">Try selecting a different filter or create a new session.</p>
+          <div style={{ padding: '48px', textAlign: 'center', color: '#6b7280' }}>
+            <Calendar style={{ width: '40px', height: '40px', color: '#d1d5db', margin: '0 auto 12px' }} />
+            <div style={{ fontWeight: 600, color: '#374151', fontSize: '15px' }}>No sessions match this filter</div>
+            <div style={{ fontSize: '13px', color: '#9ca3af', marginTop: '4px' }}>Try selecting a different filter or create a new session.</div>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
+          <div>
             {filteredSessions.map(session => {
-              const hasStudioContent = !!session.studio_content;
-              const hasGallery = !!(session.gallery_images && session.gallery_images.length > 0);
-              const isDocumented = hasStudioContent || hasGallery;
+              const isPublishedDoc = session.documentation_status === 'published';
+              const isDraftDoc = session.documentation_status === 'draft';
 
               return (
-                <div 
-                  key={session.id} 
-                  className="p-4 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-start gap-3.5">
-                    <div className="mt-1 flex-shrink-0">{getStatusIcon(session.status)}</div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <h3 className="font-bold text-gray-900 text-base sm:text-lg">{session.title}</h3>
-                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                          session.status === 'published' ? 'bg-green-100 text-green-700' :
-                          session.status === 'completed' ? 'bg-blue-100 text-blue-700' :
-                          session.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                          'bg-gray-200 text-gray-700'
-                        }`}>
+                <div key={session.id} className="admin-session-row">
+                  <div className="admin-session-main">
+                    <div className="admin-session-status-icon">
+                      {getStatusIcon(session.status)}
+                    </div>
+                    <div className="admin-session-content">
+                      <div className="admin-session-title-line">
+                        <h3 className="admin-session-title">{session.title}</h3>
+                        <span className={`admin-status-badge admin-status-${session.status}`}>
                           {session.status}
                         </span>
 
-                        {/* Studio Documentation Indicator */}
                         {session.status === 'completed' && (
-                          isDocumented ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                              <Sparkles className="w-3 h-3" /> Studio Documented
+                          isPublishedDoc ? (
+                            <span className="admin-studio-badge">
+                              <Sparkles style={{ width: '12px', height: '12px' }} /> Studio Published
+                            </span>
+                          ) : isDraftDoc ? (
+                            <span className="admin-studio-badge-pending" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
+                              <BookOpen style={{ width: '12px', height: '12px' }} /> Doc Draft
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                              <BookOpen className="w-3 h-3" /> Notes Pending
+                            <span className="admin-studio-badge-pending">
+                              <BookOpen style={{ width: '12px', height: '12px' }} /> Needs Doc
                             </span>
                           )
                         )}
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-500">
+                      <div className="admin-session-meta">
                         <span>{new Date(session.scheduled_at).toLocaleDateString(undefined, {
                           weekday: 'short',
                           year: 'numeric',
@@ -230,80 +239,112 @@ export default function AdminDashboard() {
                             <span>{session.chapters}</span>
                           </>
                         )}
+                        {session.exclude_from_reports && (
+                          <>
+                            <span>•</span>
+                            <span style={{ color: '#b45309', backgroundColor: '#fef3c7', padding: '1px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
+                              Excluded from Reports
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
                   
                   {/* Actions Bar */}
-                  <div className="flex items-center flex-wrap gap-2 self-end md:self-center">
-                    {/* Public Links */}
+                  <div className="admin-row-actions">
                     {session.status === 'completed' && (
-                      <Link
-                        to={`/studio/${session.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
-                        title="View on Public Studio Page"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>View Studio</span>
-                      </Link>
+                      <>
+                        <Link
+                          to={`/admin/sessions/${session.id}/document`}
+                          className="admin-action-btn-green"
+                          title="Document or edit Studio notes"
+                        >
+                          <FileText style={{ width: '14px', height: '14px' }} />
+                          <span>{session.documentation_status === 'published' ? 'Edit Studio Doc' : 'Document Studio'}</span>
+                        </Link>
+                        <Link
+                          to={`/admin/sessions/${session.id}/document?tab=metrics`}
+                          className="admin-action-btn"
+                          title="Record Attendance & Feedback metrics"
+                        >
+                          <Users style={{ width: '14px', height: '14px', color: '#0284c7' }} />
+                          <span>Attendance & Feedback</span>
+                        </Link>
+                        {session.documentation_status === 'published' && (
+                          <>
+                            <Link
+                              to={`/studio/${session.id}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="admin-action-btn"
+                              title="View on Public Studio Page"
+                            >
+                              <ExternalLink style={{ width: '14px', height: '14px' }} />
+                              <span>View Studio</span>
+                            </Link>
+                            <button
+                              onClick={() => handleUnpublishStudio(session)}
+                              className="admin-action-btn"
+                              title="Unpublish from Reading Studio back to draft"
+                            >
+                              <RotateCcw style={{ width: '14px', height: '14px' }} />
+                              <span>Unpublish</span>
+                            </button>
+                          </>
+                        )}
+                      </>
                     )}
 
-                    {session.status === 'published' && (
-                      <Link
-                        to={`/sessions`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
-                        title="View Public Sessions"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>Public Page</span>
-                      </Link>
-                    )}
+                    <Link 
+                      to={`/admin/sessions/${session.id}/edit`}
+                      className="admin-action-btn"
+                      title="Edit Session Schedule / Details"
+                    >
+                      <Edit2 style={{ width: '14px', height: '14px' }} />
+                      <span>Edit Details</span>
+                    </Link>
 
-                    {/* Published Session Actions */}
                     {session.status === 'published' && (
                       <>
+                        <Link
+                          to={`/sessions`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="admin-action-btn"
+                          title="View Public Sessions"
+                        >
+                          <ExternalLink style={{ width: '14px', height: '14px' }} />
+                          <span>Public Page</span>
+                        </Link>
                         <button
                           onClick={() => handleCompleteSession(session)}
-                          className="px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg transition-colors text-xs font-semibold flex items-center gap-1.5"
+                          className="admin-action-btn-green"
                           title="Mark this session as finished and document it"
                         >
-                          <CheckCircle2 className="w-4 h-4 text-green-600" />
+                          <CheckCircle2 style={{ width: '15px', height: '15px' }} />
                           <span>Complete & Document</span>
                         </button>
                         <button
                           onClick={() => handleCancelSession(session)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="admin-icon-btn-danger"
                           title="Cancel Session"
+                          aria-label="Cancel Session"
                         >
-                          <XCircle className="w-4 h-4" />
+                          <XCircle style={{ width: '16px', height: '16px' }} />
                         </button>
                       </>
                     )}
 
-                    {/* Completed Session Quick Action */}
-                    {session.status === 'completed' && !isDocumented && (
-                      <Link
-                        to={`/admin/sessions/${session.id}/edit`}
-                        className="px-3 py-1.5 bg-primary text-white hover:bg-primary-dark rounded-lg transition-colors text-xs font-semibold flex items-center gap-1.5 shadow-sm"
-                      >
-                        <Camera className="w-3.5 h-3.5" />
-                        <span>Add Studio Notes</span>
-                      </Link>
-                    )}
-
-                    {/* Standard Edit */}
-                    <Link 
-                      to={`/admin/sessions/${session.id}/edit`}
-                      className="px-3 py-1.5 text-gray-700 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors text-xs font-medium flex items-center gap-1 border border-gray-200"
-                      title="Edit Session"
+                    {/* Delete Session Button (Always available for admin) */}
+                    <button
+                      onClick={() => handleDeleteSession(session)}
+                      className="admin-icon-btn-danger"
+                      title="Delete Session"
+                      aria-label="Delete Session"
                     >
-                      <Edit2 className="w-3.5 h-3.5" />
-                      <span>{session.status === 'completed' ? 'Edit Studio' : 'Edit'}</span>
-                    </Link>
+                      <Trash2 style={{ width: '16px', height: '16px' }} />
+                    </button>
                   </div>
                 </div>
               );
@@ -314,4 +355,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

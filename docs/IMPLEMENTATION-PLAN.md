@@ -99,41 +99,80 @@ Each milestone produces a working increment. No milestone is started until the p
 
 ---
 
-## Milestone 5: Journal Workflow
+## Milestone 5: Journal Workflow (Current)
 **Goal**: Member verification → draft submission → approval → public article.
 
 ### Deliverables
-- [ ] Member registration (email + password).
-- [ ] Member requests verification from admin.
-- [ ] Verified member can create journal draft and submit it.
-- [ ] Admin reviews and approves/rejects submissions.
-- [ ] Published articles appear on Journal page.
-- [ ] Articles stay in their original language.
+- [x] Member registration (email + password).
+- [x] Member requests verification from admin.
+- [x] Verified member can create journal draft and submit it.
+- [x] Admin reviews and approves/rejects submissions.
+- [x] Published articles appear on Journal page.
+- [x] Articles stay in their original language.
 
 ---
 
-## Milestone 6: Remaining Content
+## Milestone 6: Remaining Content (Current)
 **Goal**: Resources, About, annual reports, downloadable PDFs.
 
 ### Deliverables
-- [ ] Resources page with preparation guides.
-- [ ] About page.
-- [ ] Annual Reports page (web view + downloadable PDF).
-- [ ] Contact section.
+- [x] Resources page with preparation guides.
+- [x] About page.
+- [x] Annual Reports page (web view + downloadable PDF).
+- [x] Contact section.
 
 ---
 
-## Milestone 7: Deployment
+## Milestone 7: Deployment (Current)
 **Goal**: Production deployment with persistent data, media storage, backups.
 
 ### Deliverables
-- [ ] Production Docker Compose configuration.
-- [ ] Caddy reverse proxy with TLS.
-- [ ] Persistent PostgreSQL volume.
-- [ ] Persistent media storage volume.
-- [ ] Backup strategy documented.
-- [ ] Deployment instructions in docs.
-- [ ] Environment variable documentation.
+- [x] Production Docker Compose configuration.
+- [x] Cloudflare Tunnel (`cloudflared`) integration (Replaced Caddy).
+- [x] Persistent PostgreSQL volume.
+- [x] Persistent media storage volume.
+- [x] Backup strategy documented.
+- [x] Deployment instructions in docs (`DEPLOYMENT.md`).
+- [x] Environment variable documentation.
+
+---
+
+---
+
+## Phase 2: Automated Annual Reports
+
+### Milestone 2.1: Inspection & Plan Approval (Completed)
+- [x] Baseline database, tests, migrations, and layout spacing inspected.
+- [x] Database recovery checkpoint created (`checkpoint_before_milestone2.sql`).
+- [x] Plan reviewed and approved with recorded corrections.
+
+### Milestone 2.2: Post-Session Attendance & Feedback Entry (In Progress)
+**Goal**: Admin can record structured post-session metrics, attendance visits (unknown vs zero), feedback card tallies, and reviewed anonymous quotes with explicit publication permissions.
+
+#### Scope & Deliverables
+- [ ] Database Schema & Alembic Migration:
+  - `session_metrics` table with `attendance_visits`, `actual_date`, `actual_duration_minutes`, `attendance_in_person`, `attendance_online`, `counting_method`, `staff_included`, `feedback_cards_received`, 1-5 rating counts, `unrated_count`, `tally_completed`, `internal_notes`, `version`.
+  - `feedback_quotes` table with `quote_text`, `source_language`, `source_type`, `permission_to_publish` (default `false`), `is_reviewed` (default `false`), `is_highlight`, `reviewed_by`, `reviewed_at`.
+  - `exclude_from_reports` boolean column on `sessions` (default `false`) for explicit test/demo exclusion.
+- [ ] Backend API (`app/api/session_metrics.py` & schemas):
+  - `GET /api/sessions/{id}/metrics` (admin/organizer only)
+  - `PUT /api/sessions/{id}/metrics` (optimistic locking with `version`, partial drafts permitted, tally reconciliation enforced when `tally_completed` is true)
+  - `GET /api/sessions/{id}/quotes` (admin/organizer only)
+  - `POST /api/sessions/{id}/quotes` (permission defaults to `false`, reviews recorded)
+  - `PATCH /api/sessions/{id}/quotes/{quote_id}` (verifies quote belongs to session in URL)
+  - `DELETE /api/sessions/{id}/quotes/{quote_id}` (verifies quote belongs to session in URL)
+- [ ] Privacy & Data Integrity Rules:
+  - Unknown vs confirmed zero: `null` preserved, never converted to 0.
+  - Hybrid attendance split: in-person and online are optional.
+  - Private notes & unreviewed/unpermitted quotes strictly excluded from public responses.
+  - Concurrent-edit protection: version mismatch returns HTTP 409 Conflict.
+- [ ] Frontend Admin UI:
+  - Attendance & Feedback metrics panel in Session Documenter / Management.
+  - Form validation with warning badges for tally discrepancies.
+  - Reviewed quotes management with publication permission toggles.
+- [ ] Testing & Verification:
+  - Backend integration test suite covering save/reload, unknown vs 0, tally draft vs complete, quote permission defaults, URL path validation, privacy shielding, and optimistic lock conflicts.
+  - Verification that existing session and Studio endpoints still pass.
 
 ---
 

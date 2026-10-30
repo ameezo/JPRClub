@@ -141,6 +141,8 @@ jpr-club/
 │  PostgreSQL                                                  │
 │  - Users, roles, permissions                                 │
 │  - Sessions (with status: draft/published/cancelled)         │
+│  - SessionMetrics (attendance visits, cards, ratings, notes) │
+│  - FeedbackQuotes (reviewed quotes with publication consent) │
 │  - Journal articles (with approval workflow)                 │
 │  - Studio content, resources metadata                        │
 │  - Audit log (request timestamps)                            │
