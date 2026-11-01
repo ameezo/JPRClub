@@ -41,22 +41,22 @@ services:
       dockerfile: ../docker/frontend.prod.Dockerfile
     container_name: jprclub-frontend-prod
     restart: always
-    ports:
-      - "${PORT:-80}:80"
+  #  ports:
+  #    - "${PORT:-80}:80"
     depends_on:
       - backend
     environment:
       VITE_API_URL: /api
-  # cloudflared:
-  #   image: cloudflare/cloudflared:latest
-  #   container_name: jprclub-tunnel
-  #   restart: always
-  #   command: tunnel --no-autoupdate run
-  #   environment:
-  #     - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-  #   depends_on:
-  #     - frontend
-  #     - backend
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: jprclub-tunnel
+    restart: always
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - frontend
+      - backend
 
 volumes:
   postgres_data:
