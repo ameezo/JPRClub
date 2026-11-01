@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jprclub}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jprclub}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,6 +47,16 @@ services:
       - backend
     environment:
       VITE_API_URL: /api
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: jprclub-tunnel
+  #   restart: always
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+  #   depends_on:
+  #     - frontend
+  #     - backend
 
 volumes:
   postgres_data:
