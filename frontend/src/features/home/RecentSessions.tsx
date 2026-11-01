@@ -33,7 +33,7 @@ export default function RecentSessions() {
     <section className="section recent-sessions">
       <div className="section-header">
         <h3 className="section-title">{t('home.pastSessions')}</h3>
-        <p>{t('home.catchUp')}</p>
+        <p className="section-subtitle">{t('home.catchUp')}</p>
       </div>
       
       <div className="cards-grid">
@@ -53,6 +53,8 @@ export default function RecentSessions() {
               excerpt={session.description}
               excerptAr={session.description_ar}
               linkBase="/studio"
+              coverImageUrl={session.cover_image_url}
+              category={session.material_type}
             />
           );
         })}

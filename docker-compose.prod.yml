@@ -41,22 +41,12 @@ services:
       dockerfile: ../docker/frontend.prod.Dockerfile
     container_name: jprclub-frontend-prod
     restart: always
+    ports:
+      - "${PORT:-80}:80"
     depends_on:
       - backend
     environment:
       VITE_API_URL: /api
-    # If using Nginx inside frontend container to serve static files, it exposes port 80
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: jprclub-tunnel
-    restart: always
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-    depends_on:
-      - frontend
-      - backend
 
 volumes:
   postgres_data:

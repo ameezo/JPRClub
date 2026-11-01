@@ -31,11 +31,30 @@ export default function SessionDetailPage() {
   }, [id]);
 
   if (loading) {
-    return <div className="pt-32 pb-20 min-h-screen bg-gray-50 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
+    return (
+      <div className="public-page-wrapper">
+        <Container className="text-center" style={{ paddingTop: '5rem' }}>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" style={{ borderColor: 'var(--accent-sakura)' }}></div>
+          <p style={{ marginTop: '1rem', color: 'var(--ink-secondary)' }}>Loading session details...</p>
+        </Container>
+      </div>
+    );
   }
 
   if (!session) {
-    return <div className="pt-32 pb-20 min-h-screen bg-gray-50 text-center">Session not found.</div>;
+    return (
+      <div className="public-page-wrapper">
+        <Container className="text-center" style={{ paddingTop: '5rem' }}>
+          <div className="tactile-card" style={{ maxWidth: '500px', margin: '0 auto', padding: '3rem 2rem' }}>
+            <BookOpen size={48} style={{ color: 'var(--accent-sakura)', margin: '0 auto 1rem' }} />
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Session Not Found</h2>
+            <Link to="/sessions" className="tactile-btn tactile-btn-primary">
+              Return to Sessions
+            </Link>
+          </div>
+        </Container>
+      </div>
+    );
   }
 
   const displayTitle = isAr && session.title_ar ? session.title_ar : session.title;
@@ -43,59 +62,66 @@ export default function SessionDetailPage() {
   const date = new Date(session.scheduled_at);
 
   return (
-    <div className="pt-32 pb-20 min-h-screen bg-gray-50">
+    <div className="public-page-wrapper" style={{ paddingTop: '2.5rem' }}>
       <Container>
-        <Link to="/sessions" className="inline-flex items-center gap-2 text-primary hover:underline mb-8">
-          <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
-          {t('nav.sessions') || "Back to Sessions"}
-        </Link>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <Link to="/sessions" className="tactile-btn">
+            <ArrowLeft style={{ width: '16px', height: '16px', transform: isAr ? 'rotate(180deg)' : 'none' }} />
+            <span>{t('nav.sessions') || "Back to Sessions"}</span>
+          </Link>
+        </div>
         
-        <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-gray-100 max-w-4xl mx-auto relative">
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-accent rounded-t-3xl" />
-          
-          <div className="flex flex-col md:flex-row gap-8 justify-between items-start mb-10">
+        {/* Main Session Detail Tactile Card */}
+        <div className="tactile-card session-detail-card" style={{ maxWidth: '900px', margin: '0 auto', padding: '40px' }}>
+          {/* Header row with status badge and Join dropdown */}
+          <div className="session-detail-header-row">
             <div>
-              <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-medium text-sm mb-4">
-                {session.status.toUpperCase()}
+              <div className="tactile-stamp session-status-pill">
+                <span>●</span>
+                <span>{session.status.toUpperCase()}</span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900 leading-tight">
+              <h1 className="session-detail-title">
                 {displayTitle}
               </h1>
             </div>
             
-            <JoinDropdown nextSession={session} align="end" />
+            <div className="session-detail-actions">
+              <JoinDropdown nextSession={session} align="end" />
+            </div>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4 mb-12">
-            <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center">
-              <Calendar className="w-8 h-8 text-primary mb-3" />
-              <div className="text-sm text-gray-500 mb-1">Date</div>
-              <div className="font-semibold text-gray-900">
-                {date.toLocaleDateString(isAr ? 'ar-SA' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          {/* 3 Tactile Metadata Boxes */}
+          <div className="session-metadata-grid">
+            <div className="session-meta-box">
+              <Calendar className="session-meta-icon" />
+              <div className="session-meta-label">{isAr ? 'التاريخ' : 'Date'}</div>
+              <div className="session-meta-value">
+                {date.toLocaleDateString(isAr ? 'ar-SA' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
               </div>
             </div>
             
-            <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center">
-              <Clock className="w-8 h-8 text-primary mb-3" />
-              <div className="text-sm text-gray-500 mb-1">Time & Duration</div>
-              <div className="font-semibold text-gray-900">
+            <div className="session-meta-box">
+              <Clock className="session-meta-icon" />
+              <div className="session-meta-label">{isAr ? 'الوقت والمدة' : 'Time & Duration'}</div>
+              <div className="session-meta-value">
                 {date.toLocaleTimeString(isAr ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })} • {session.duration_minutes} min
               </div>
             </div>
             
-            <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center">
-              <BookOpen className="w-8 h-8 text-primary mb-3" />
-              <div className="text-sm text-gray-500 mb-1">Material</div>
-              <div className="font-semibold text-gray-900 flex flex-col">
-                <span>{session.material_type}</span>
-                <span className="text-sm text-gray-600">{session.chapters}</span>
+            <div className="session-meta-box">
+              <BookOpen className="session-meta-icon" />
+              <div className="session-meta-label">{isAr ? 'المادة المقروءة' : 'Material & Level'}</div>
+              <div className="session-meta-value">
+                <span>{session.material_type || 'Japanese Text'}</span>
+                {session.chapters && <span className="session-meta-subvalue">{session.chapters}</span>}
               </div>
             </div>
           </div>
 
-          <div className="prose prose-lg max-w-none text-gray-700">
-            <h3 className="text-2xl font-bold font-display text-gray-900 mb-4">About this Session</h3>
-            <p className="whitespace-pre-wrap">{displayDesc}</p>
+          {/* About Section */}
+          <div className="session-detail-about-box">
+            <h3 className="session-about-heading">{isAr ? 'عن هذه الجلسة' : 'About this Session'}</h3>
+            <p className="session-about-desc">{displayDesc}</p>
           </div>
         </div>
       </Container>

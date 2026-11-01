@@ -1,10 +1,10 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiClient, getMediaUrl, type Session } from '@/lib/api';
 import { extractSessionPhotos, type SessionPhotoItem } from '@/lib/content-utils';
 import Container from '@/components/ui/Container';
-import { Camera, Calendar, ArrowRight } from 'lucide-react';
+import { Camera, Calendar, ArrowRight, ChevronLeft, ChevronRight, X, BookOpen } from 'lucide-react';
 
 export default function GalleryPage() {
   const { t, i18n } = useTranslation();
@@ -13,6 +13,9 @@ export default function GalleryPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set());
+
+  // Lightbox Modal State
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchStudioSessions = async () => {
@@ -48,34 +51,73 @@ export default function GalleryPage() {
     setFailedUrls(prev => new Set(prev).add(url));
   };
 
+  // Lightbox keyboard navigation
+  const activePhoto = lightboxIndex !== null && photos[lightboxIndex] ? photos[lightboxIndex] : null;
+
+  const handlePrev = useCallback(() => {
+    if (lightboxIndex === null) return;
+    setLightboxIndex(prev => (prev! > 0 ? prev! - 1 : photos.length - 1));
+  }, [lightboxIndex, photos.length]);
+
+  const handleNext = useCallback(() => {
+    if (lightboxIndex === null) return;
+    setLightboxIndex(prev => (prev! < photos.length - 1 ? prev! + 1 : 0));
+  }, [lightboxIndex, photos.length]);
+
+  const handleClose = useCallback(() => {
+    setLightboxIndex(null);
+  }, []);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      } else if (e.key === 'ArrowLeft') {
+        if (isAr) handleNext();
+        else handlePrev();
+      } else if (e.key === 'ArrowRight') {
+        if (isAr) handlePrev();
+        else handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [lightboxIndex, isAr, handleNext, handlePrev, handleClose]);
+
   return (
     <div className="public-page-wrapper">
       <Container>
         {/* Header */}
-        <div className="studio-page-header" style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h1 className="studio-page-heading" style={{ fontSize: '2.5rem', fontWeight: 800, color: '#111827', marginBottom: '12px' }}>
-            {isAr ? 'معرض الصور' : (t('nav.gallery') || 'Photo Gallery')}
+        <div className="studio-page-header">
+          <div className="studio-header-hanko">
+            <span className="studio-hanko-text">写真館</span>
+          </div>
+          <h1 className="studio-page-heading">
+            {isAr ? 'معرض الصور وقصاصات النادي' : (t('nav.gallery') || 'Photo Gallery & Storybook')}
           </h1>
-          <p className="studio-page-subheading" style={{ color: '#6b7280', fontSize: '1.1rem', maxWidth: '640px', margin: '0 auto' }}>
+          <p className="studio-page-subheading">
             {isAr
-              ? 'لقطات وذكريات ومناقشات من استوديو القراءة. انقر على أي صورة للانتقال إلى تفاصيل جلستها.'
-              : 'Glimpses, book discussions, and memories from our Reading Studio sessions. Click any photo to view its session summary.'}
+              ? 'لقطات وذكريات ومناقشات مصورة من جلسات النادي. انقر على أي صورة لفتحها بالحجم الكامل أو تصفح ملخص جلستها.'
+              : 'Glimpses, book discussions, and memories from our Reading Studio sessions. Click any photo to open the storybook lightbox.'}
           </p>
         </div>
 
         {/* Loading State */}
         {loading ? (
-          <div className="public-empty-state" style={{ padding: '64px 0', textAlign: 'center', color: '#6b7280' }}>
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4" style={{ borderColor: '#e88599' }}></div>
-            <p>Loading photo gallery...</p>
+          <div className="public-empty-state">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4" style={{ borderColor: 'var(--accent-sakura)' }}></div>
+            <p>Loading photo storybook...</p>
           </div>
         ) : photos.length === 0 ? (
-          <div className="public-empty-state" style={{ padding: '64px 0', textAlign: 'center' }}>
-            <Camera style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: '#d1d5db' }} />
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px', color: '#374151' }}>
+          <div className="public-empty-state">
+            <Camera style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: 'var(--ink-secondary)' }} />
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px', color: 'var(--ink-primary)' }}>
               {isAr ? 'لا توجد صور في المعرض حتى الآن' : 'No studio gallery photos yet'}
             </h2>
-            <p style={{ margin: 0, color: '#6b7280', fontSize: '14px' }}>
+            <p style={{ margin: 0, color: 'var(--ink-secondary)', fontSize: '14px' }}>
               {isAr ? 'ستظهر هنا صور جلسات استوديو القراءة المكتملة.' : 'Photos added to completed Reading Studio sessions will appear here.'}
             </p>
           </div>
@@ -98,29 +140,11 @@ export default function GalleryPage() {
               }) : '';
 
               return (
-                <Link
+                <div
                   key={`${photo.sessionId}-${idx}`}
-                  to={`/studio/${photo.sessionId}`}
-                  style={{
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    display: 'block',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    backgroundColor: '#ffffff',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.05)',
-                    border: '1px solid #f3f4f6',
-                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 0, 0, 0.12)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.05)';
-                  }}
-                  title={displayTitle}
+                  className="tactile-card gallery-polaroid-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setLightboxIndex(idx)}
                 >
                   {/* Photo Container */}
                   <div
@@ -128,8 +152,9 @@ export default function GalleryPage() {
                       position: 'relative',
                       width: '100%',
                       aspectRatio: '4 / 3',
-                      backgroundColor: '#f3f4f6',
+                      backgroundColor: 'var(--bg-paper-alt)',
                       overflow: 'hidden',
+                      borderBottom: '1.5px solid #1C1917',
                     }}
                   >
                     <img
@@ -145,7 +170,7 @@ export default function GalleryPage() {
                         transition: 'transform 0.3s ease',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.transform = 'scale(1.04)';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';
@@ -154,20 +179,16 @@ export default function GalleryPage() {
 
                     {photo.materialType && (
                       <span
+                        className="tactile-stamp"
                         style={{
                           position: 'absolute',
                           top: '12px',
                           left: isAr ? 'auto' : '12px',
                           right: isAr ? '12px' : 'auto',
-                          backgroundColor: 'rgba(0, 0, 0, 0.65)',
-                          backdropFilter: 'blur(4px)',
-                          color: '#ffffff',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          padding: '3px 8px',
-                          borderRadius: '6px',
+                          backgroundColor: 'rgba(255, 253, 249, 0.95)',
+                          color: '#1C1917',
+                          fontSize: '10px',
                           textTransform: 'uppercase',
-                          letterSpacing: '0.04em',
                         }}
                       >
                         {photo.materialType}
@@ -175,12 +196,13 @@ export default function GalleryPage() {
                     )}
                   </div>
 
-                  {/* Card Footer */}
+                  {/* Card Body & Footer */}
                   <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{
+                      fontFamily: 'var(--font-heading)',
                       fontWeight: 700,
-                      fontSize: '15px',
-                      color: '#111827',
+                      fontSize: '16px',
+                      color: 'var(--ink-primary)',
                       lineHeight: 1.3,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
@@ -195,31 +217,137 @@ export default function GalleryPage() {
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       fontSize: '12px',
-                      color: '#6b7280',
+                      color: 'var(--ink-secondary)',
                       marginTop: '4px',
                     }}>
                       {dateStr && (
                         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Calendar style={{ width: '13px', height: '13px', color: '#9ca3af' }} />
+                          <Calendar style={{ width: '13px', height: '13px', color: 'var(--accent-sakura)' }} />
                           {dateStr}
                         </span>
                       )}
 
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        color: '#e88599',
-                        fontWeight: 600,
-                      }}>
-                        {isAr ? 'عرض الجلسة' : 'View Session'}
+                      {/* Direct jump to written summary */}
+                      <Link
+                        to={`/studio/${photo.sessionId}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="gallery-view-session-link"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          color: 'var(--accent-sakura)',
+                          fontWeight: 700,
+                          textDecoration: 'none',
+                        }}
+                      >
+                        <span>{isAr ? 'عرض الجلسة' : 'View Session'}</span>
                         <ArrowRight style={{ width: '13px', height: '13px', transform: isAr ? 'rotate(180deg)' : 'none' }} />
-                      </span>
+                      </Link>
                     </div>
                   </div>
-                </Link>
+                </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Storybook Lightbox Modal */}
+        {lightboxIndex !== null && activePhoto && (
+          <div 
+            className="storybook-lightbox-backdrop"
+            onClick={handleClose}
+          >
+            <div 
+              className="storybook-lightbox-modal"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+            >
+              {/* Modal Top Bar */}
+              <div className="lightbox-top-bar">
+                <div className="lightbox-header-info">
+                  <span className="lightbox-hanko">図書</span>
+                  <div className="lightbox-titles">
+                    <h3 className="lightbox-session-title">
+                      {isAr && activePhoto.sessionTitleAr ? activePhoto.sessionTitleAr : activePhoto.sessionTitle}
+                    </h3>
+                    <div className="lightbox-meta-pills">
+                      {activePhoto.materialType && (
+                        <span className="tactile-stamp lightbox-material-pill">
+                          {activePhoto.materialType}
+                        </span>
+                      )}
+                      {activePhoto.scheduledAt && (
+                        <span className="lightbox-date-pill">
+                          <Calendar size={13} />
+                          {new Date(activePhoto.scheduledAt).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', {
+                            year: 'numeric', month: 'short', day: 'numeric'
+                          })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lightbox-top-right">
+                  <span className="lightbox-counter-badge">
+                    {isAr ? `صورة ${lightboxIndex + 1} من ${photos.length}` : `Photo ${lightboxIndex + 1} of ${photos.length}`}
+                  </span>
+                  <button
+                    type="button"
+                    className="tactile-btn lightbox-close-btn"
+                    onClick={handleClose}
+                    aria-label="Close lightbox"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Center Image */}
+              <div className="lightbox-image-stage">
+                <img
+                  src={getMediaUrl(activePhoto.url)}
+                  alt={activePhoto.sessionTitle}
+                  className="lightbox-main-img"
+                />
+              </div>
+
+              {/* Modal Bottom Bar */}
+              <div className="lightbox-bottom-bar">
+                <div className="lightbox-nav-buttons">
+                  <button
+                    type="button"
+                    className="tactile-btn lightbox-nav-btn"
+                    onClick={handlePrev}
+                    title={isAr ? 'الصورة التالية' : 'Previous Photo'}
+                  >
+                    <ChevronLeft size={16} />
+                    <span>{isAr ? 'السابقة' : 'Previous'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="tactile-btn lightbox-nav-btn"
+                    onClick={handleNext}
+                    title={isAr ? 'الصورة السابقة' : 'Next Photo'}
+                  >
+                    <span>{isAr ? 'التالية' : 'Next'}</span>
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+
+                {activePhoto.sessionId && (
+                  <Link
+                    to={`/studio/${activePhoto.sessionId}`}
+                    className="tactile-btn tactile-btn-primary lightbox-read-notes-btn"
+                  >
+                    <BookOpen size={16} />
+                    <span>{isAr ? 'قراءة ملخص الجلسة الكامل ←' : 'Read Full Session Notes →'}</span>
+                  </Link>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </Container>

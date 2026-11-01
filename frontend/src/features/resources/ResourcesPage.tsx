@@ -20,7 +20,10 @@ import {
   Globe, 
   Languages, 
   Layers,
-  RotateCcw
+  RotateCcw,
+  LayoutGrid,
+  List,
+  ExternalLink
 } from 'lucide-react';
 
 const YoutubeIcon = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
@@ -42,6 +45,9 @@ export default function ResourcesPage() {
   const [selectedJlpt, setSelectedJlpt] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [recommendedOnly, setRecommendedOnly] = useState<boolean>(false);
+
+  // View Mode: Cards Grid vs Compact Index Table ("The B-Sides")
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -185,20 +191,20 @@ export default function ResourcesPage() {
     { id: 'youtube', label: isAr ? 'يوتيوب' : 'YouTube', icon: <YoutubeIcon className="w-3.5 h-3.5" /> },
     { id: 'websites', label: isAr ? 'مواقع' : 'Websites', icon: <Globe className="w-3.5 h-3.5" /> },
     { id: 'grammar', label: isAr ? 'قواعد' : 'Grammar', icon: <Languages className="w-3.5 h-3.5" /> },
-    { id: 'hiragana_katakana', label: isAr ? 'هيراغانا وكاتاكانا' : 'Kana', icon: <span className="font-serif font-bold text-xs">あ</span> },
+    { id: 'hiragana_katakana', label: isAr ? 'هيراغانا وكاتاكانا' : 'Kana', icon: <span style={{ fontFamily: 'serif', fontWeight: 800 }}>あ</span> },
   ];
 
   return (
-    <div className="public-page-wrapper bg-gray">
+    <div className="public-page-wrapper">
       <Container>
         {/* Header */}
         <div className="resources-header-box">
-          <div className="resources-badge">
-            <Sparkles style={{ width: '15px', height: '15px' }} />
-            <span>{isAr ? 'المكتبة الرقمية والمصادر' : 'Curated Learning Hub'}</span>
+          <div className="tactile-stamp resources-badge">
+            <Sparkles style={{ width: '14px', height: '14px', color: 'var(--accent-sakura)' }} />
+            <span>{isAr ? 'المكتبة الرقمية والمصادر المنسقة' : 'Curated Japanese Reading & Audio Hub'}</span>
           </div>
           <h1 className="resources-page-title">
-            {t('resources.title') || (isAr ? 'المصادر والأدلة' : 'Resources & Guides')}
+            {t('resources.title') || (isAr ? 'المصادر والأدلة' : 'Resources & Directory')}
           </h1>
           <p className="resources-page-desc">
             {t('resources.subtitle') || (isAr 
@@ -209,37 +215,37 @@ export default function ResourcesPage() {
 
         {/* Admin Quick Action Banner */}
         {isAdmin && (
-          <div className="resources-admin-bar">
+          <div className="tactile-card resources-admin-bar">
             <div className="resources-admin-info">
               <span style={{ fontSize: '18px' }}>⚡</span>
               <span>
-                {isAr ? 'لوحة تحكم المشرف: يمكنك إضافة أو تعديل المصادر مباشرة' : 'Admin Controls: Manage resources or import Excel dataset'}
+                {isAr ? 'لوحة تحكم المشرف: إدارة وتعديل المصادر واستيراد الإكسل' : 'Admin Controls: Manage resources or import Excel dataset'}
               </span>
             </div>
             <div className="resources-admin-actions">
               <button
                 type="button"
-                className="btn-admin-add"
+                className="tactile-btn tactile-btn-primary"
                 onClick={handleCreate}
               >
-                <Plus style={{ width: '16px', height: '16px' }} />
+                <Plus style={{ width: '15px', height: '15px' }} />
                 <span>{isAr ? 'إضافة مصدر جديد' : 'Add New Resource'}</span>
               </button>
               <button
                 type="button"
-                className="btn-admin-sync"
+                className="tactile-btn"
                 onClick={handleSyncExcel}
                 title="Re-seed podcasts from Japanese_Podcasts_N5_to_N1.xlsx"
               >
-                <FileSpreadsheet style={{ width: '16px', height: '16px' }} />
+                <FileSpreadsheet style={{ width: '15px', height: '15px' }} />
                 <span>{isAr ? 'مزامنة إكسل البودكاست' : 'Sync Excel Podcasts'}</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* Long Wide Filter Bar */}
-        <div className="resources-filter-container">
+        {/* Tactile Filter Container */}
+        <div className="tactile-card resources-filter-container">
           {/* Main Controls Row */}
           <div className="resources-filter-row">
             {/* Search Input */}
@@ -247,7 +253,7 @@ export default function ResourcesPage() {
               <Search className="resources-search-icon" />
               <input
                 type="text"
-                placeholder={t('resources.searchPlaceholder') || (isAr ? 'ابحث عن بودكاست أو مصدر...' : 'Search resources by name or topic...')}
+                placeholder={t('resources.searchPlaceholder') || (isAr ? 'ابحث عن بودكاست أو مصدر...' : 'Search resources by title or topic...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="resources-search-input"
@@ -307,7 +313,7 @@ export default function ResourcesPage() {
               <button
                 key={pill.id}
                 type="button"
-                className={`resource-pill ${selectedCategory === pill.id ? 'active' : ''}`}
+                className={`tactile-btn resource-filter-pill ${selectedCategory === pill.id ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(pill.id)}
               >
                 {pill.icon}
@@ -316,7 +322,7 @@ export default function ResourcesPage() {
             ))}
           </div>
 
-          {/* JLPT Sub-levels Row (shown if JLPT or all levels selected) */}
+          {/* JLPT Sub-levels Row */}
           {(selectedLevel === 'jlpt' || selectedCategory === 'podcast' || selectedJlpt !== 'all') && (
             <div className="jlpt-sublevels-row">
               <span className="jlpt-sublevels-label">{isAr ? 'مستوى JLPT:' : 'JLPT Level:'}</span>
@@ -324,7 +330,7 @@ export default function ResourcesPage() {
                 <button
                   key={lvl}
                   type="button"
-                  className={`jlpt-sub-pill ${selectedJlpt === lvl ? 'active' : ''}`}
+                  className={`tactile-stamp jlpt-sub-pill ${selectedJlpt === lvl ? 'active' : ''}`}
                   onClick={() => setSelectedJlpt(lvl)}
                 >
                   {lvl === 'all' ? (isAr ? 'الكل' : 'All') : lvl}
@@ -333,51 +339,74 @@ export default function ResourcesPage() {
             </div>
           )}
 
-          {/* Filter Footer / Meta */}
+          {/* Filter Footer / Meta & View Mode Switcher */}
           <div className="resources-filter-meta">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <span className="resources-count-label">
                 {isAr 
                   ? `عرض ${filteredResources.length} من أصل ${resources.length} مصدر` 
                   : `Showing ${filteredResources.length} of ${resources.length} resources`}
               </span>
 
-              {/* Mais Recommended Pick Filter */}
+              {/* View Mode Switcher */}
+              <div className="view-mode-toggle-group" role="group" aria-label="View Mode">
+                <button
+                  type="button"
+                  className={`tactile-btn view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                  onClick={() => setViewMode('grid')}
+                  title="Grid Cards View"
+                >
+                  <LayoutGrid size={15} />
+                  <span>{isAr ? 'شبكة البطاقات' : 'Cards'}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`tactile-btn view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                  onClick={() => setViewMode('table')}
+                  title="Compact Index Table View (The B-Sides)"
+                >
+                  <List size={15} />
+                  <span>{isAr ? 'الفهرس السريع' : 'Directory Table'}</span>
+                </button>
+              </div>
+
+              {/* Misa Recommended Pick Filter */}
               <button
                 type="button"
-                className={`btn-filter-recommended ${recommendedOnly ? 'active' : ''}`}
+                className={`tactile-stamp btn-filter-misa-pick ${recommendedOnly ? 'active' : ''}`}
                 onClick={() => setRecommendedOnly(!recommendedOnly)}
               >
                 <Star style={{ width: '13px', height: '13px', fill: recommendedOnly ? 'currentColor' : 'none' }} />
-                <span>{isAr ? 'توصيات ميس فقط ⭐' : 'Mais Recommended Only ⭐'}</span>
+                <span>★ Misa Picks Only</span>
               </button>
             </div>
 
             {hasActiveFilters && (
               <button
                 type="button"
-                className="btn-clear-filters"
+                className="tactile-btn btn-clear-filters"
                 onClick={handleClearFilters}
               >
-                {isAr ? 'إعادة ضبط التصفية' : 'Reset all filters'}
+                <RotateCcw size={13} />
+                <span>{isAr ? 'إعادة ضبط التصفية' : 'Reset filters'}</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Resources Grid */}
+        {/* Resources Content: Grid or Index Table */}
         {loading ? (
           <div className="public-empty-state" style={{ padding: '60px 0', textAlign: 'center' }}>
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4" style={{ borderColor: '#e11d48' }}></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4" style={{ borderColor: 'var(--accent-sakura)' }}></div>
             <p>{isAr ? 'جاري تحميل المصادر...' : 'Loading resources...'}</p>
           </div>
         ) : filteredResources.length === 0 ? (
-          <div className="public-empty-state" style={{ padding: '60px 20px', textAlign: 'center', backgroundColor: '#ffffff', borderRadius: '24px', border: '1px dashed #cbd5e1' }}>
-            <Layers style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: '#94a3b8' }} />
-            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+          <div className="tactile-card public-empty-state" style={{ padding: '60px 20px', textAlign: 'center' }}>
+            <Layers style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: 'var(--ink-secondary)' }} />
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--ink-primary)', marginBottom: '8px' }}>
               {isAr ? 'لم يتم العثور على مصادر تطابق خيارات البحث' : 'No matching resources found'}
             </h3>
-            <p style={{ color: '#64748b', fontSize: '14px', maxWidth: '420px', margin: '0 auto 16px auto' }}>
+            <p style={{ color: 'var(--ink-secondary)', fontSize: '14px', maxWidth: '420px', margin: '0 auto 16px auto' }}>
               {isAr 
                 ? 'جرب تغيير خيارات التصفية أو إزالة شروط البحث للعثور على المصادر المناسبة.' 
                 : 'Try adjusting your search query, switching categories, or clearing active filters.'}
@@ -385,7 +414,7 @@ export default function ResourcesPage() {
             {hasActiveFilters && (
               <button
                 type="button"
-                className="btn-admin-add"
+                className="tactile-btn tactile-btn-primary"
                 onClick={handleClearFilters}
                 style={{ margin: '0 auto' }}
               >
@@ -394,7 +423,7 @@ export default function ResourcesPage() {
               </button>
             )}
           </div>
-        ) : (
+        ) : viewMode === 'grid' ? (
           <div className="resources-grid">
             {filteredResources.map((resource) => (
               <ResourceCard
@@ -405,6 +434,70 @@ export default function ResourcesPage() {
                 onDelete={handleDelete}
               />
             ))}
+          </div>
+        ) : (
+          /* Index Table View ("The B-Sides" / Quick Directory) */
+          <div className="tactile-card resource-index-table-wrapper">
+            <table className="resource-index-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '60px' }}>#</th>
+                  <th>{isAr ? 'العنوان والمصدر' : 'Title & Translation'}</th>
+                  <th style={{ width: '130px' }}>{isAr ? 'التصنيف' : 'Category'}</th>
+                  <th style={{ width: '120px' }}>{isAr ? 'المستوى' : 'Level'}</th>
+                  <th style={{ width: '130px' }}>{isAr ? 'التوصية' : 'Pick'}</th>
+                  <th style={{ width: '120px', textAlign: 'center' }}>{isAr ? 'رابط' : 'Link'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredResources.map((resource, idx) => {
+                  const displayTitle = isAr && resource.title_ar ? resource.title_ar : resource.title;
+                  const secondaryTitle = isAr ? (resource.title_ar ? resource.title : null) : resource.title_ar;
+                  const numStr = String(idx + 1).padStart(2, '0');
+
+                  return (
+                    <tr key={resource.id} className="resource-table-row">
+                      <td className="table-col-num">{numStr}</td>
+                      <td className="table-col-title">
+                        <div className="table-primary-title">{displayTitle}</div>
+                        {secondaryTitle && (
+                          <div className="table-secondary-title">{secondaryTitle}</div>
+                        )}
+                      </td>
+                      <td className="table-col-category">
+                        <span className="tactile-stamp table-category-stamp">
+                          {resource.category}
+                        </span>
+                      </td>
+                      <td className="table-col-level">
+                        <span className="tactile-stamp table-level-stamp">
+                          {resource.jlpt_sublevel || resource.level}
+                        </span>
+                      </td>
+                      <td className="table-col-pick">
+                        {resource.is_recommended && (
+                          <span className="badge-misa-pick">
+                            ★ Misa Pick
+                          </span>
+                        )}
+                      </td>
+                      <td className="table-col-action">
+                        <a
+                          href={resource.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="tactile-btn table-open-link"
+                          title="Open resource in new tab"
+                        >
+                          <span>{isAr ? 'فتح' : 'Open'}</span>
+                          <ExternalLink size={13} />
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
 

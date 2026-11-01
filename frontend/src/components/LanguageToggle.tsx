@@ -10,11 +10,13 @@ export default function LanguageToggle() {
 
   return (
     <button 
-      className="lang-toggle" 
+      type="button"
+      className="tactile-btn lang-toggle-btn" 
       onClick={toggleLanguage}
       aria-label="Toggle Language"
     >
-      {i18n.language === 'en' ? 'عربي' : 'EN'}
+      <span className="lang-globe-icon">🌐</span>
+      <span>{i18n.language === 'en' ? 'عربي' : 'EN'}</span>
     </button>
   );
 }

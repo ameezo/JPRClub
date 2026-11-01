@@ -60,16 +60,219 @@
   list-style-type: decimal;
 }
 
-.markdown-content blockquote {
-  font-style: italic;
-  color: #4b5563;
-  border-left: 4px solid #f7a8b8;
-  background: #fdf2f4;
-  padding: 14px 20px;
-  border-radius: 6px;
-  margin-top: 1.6em;
-  margin-bottom: 1.6em;
+.markdown-content ol {
+  list-style-type: none;
+  counter-reset: study-counter;
+  padding-left: 0;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.markdown-content ol > li {
+  counter-increment: study-counter;
+  position: relative;
+  padding-left: 38px;
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
   line-height: 1.6;
+}
+
+.markdown-content ol > li::before {
+  content: counter(study-counter);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 24px;
+  height: 24px;
+  background-color: #D9385A;
+  color: #FFFFFF;
+  border: 1.5px solid #1C1917;
+  box-shadow: 1.5px 1.5px 0px #1C1917;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+html[dir="rtl"] .markdown-content ol > li {
+  padding-left: 0;
+  padding-right: 38px;
+}
+
+html[dir="rtl"] .markdown-content ol > li::before {
+  left: auto;
+  right: 0;
+  box-shadow: -1.5px 1.5px 0px #1C1917;
+}
+
+/* Pinned Sticky Notes for Book Quotes */
+.markdown-content blockquote,
+.article-blocknote-viewer blockquote,
+.pinned-sticky-note {
+  font-style: normal;
+  color: #1C1917;
+  background-color: #FEF3C7 !important;
+  border: 1.5px solid #1C1917 !important;
+  border-radius: 8px !important;
+  box-shadow: 3px 3px 0px #1C1917 !important;
+  padding: 22px 28px !important;
+  margin: 2rem 0 !important;
+  line-height: 1.7 !important;
+  transform: rotate(-0.5deg);
+  position: relative;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+}
+
+html[dir="rtl"] .markdown-content blockquote,
+html[dir="rtl"] .article-blocknote-viewer blockquote,
+html[dir="rtl"] .pinned-sticky-note {
+  box-shadow: -3px 3px 0px #1C1917 !important;
+  transform: rotate(0.5deg);
+}
+
+.sticky-note-pin {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+}
+
+.sticky-note-quote-icon {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  color: rgba(28, 25, 23, 0.2);
+}
+
+html[dir="rtl"] .sticky-note-quote-icon {
+  left: auto;
+  right: 14px;
+}
+
+.sticky-note-body {
+  position: relative;
+  z-index: 2;
+}
+
+/* Interactive Vocabulary & Quiz Mode */
+.vocab-quiz-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #FFFDF9;
+  border: 1.5px solid #1C1917;
+  border-radius: 12px;
+  box-shadow: 2px 2px 0px #1C1917;
+  padding: 10px 16px;
+  margin-bottom: 24px;
+}
+
+.quiz-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1C1917;
+}
+
+.vocab-quiz-toggle {
+  padding: 5px 12px;
+  font-size: 12px;
+  gap: 6px;
+  background: #FAF6EE;
+}
+
+.vocab-quiz-toggle.active {
+  background: var(--accent-sakura);
+  color: #FFFFFF !important;
+}
+
+.vocab-li-wrapper {
+  list-style: none !important;
+  margin: 10px 0 !important;
+  padding: 0 !important;
+}
+
+.tactile-vocab-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #FFFDF9;
+  border: 1.5px solid #1C1917;
+  border-radius: 10px;
+  box-shadow: 2px 2px 0px #1C1917;
+  padding: 12px 18px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tactile-vocab-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #1C1917;
+}
+
+html[dir="rtl"] .tactile-vocab-card {
+  box-shadow: -2px 2px 0px #1C1917;
+}
+
+html[dir="rtl"] .tactile-vocab-card:hover {
+  transform: translate(1px, -1px);
+  box-shadow: -3px 3px 0px #1C1917;
+}
+
+.vocab-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vocab-word {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1C1917;
+}
+
+.vocab-reading-pill {
+  font-size: 12px;
+  font-weight: 700;
+  color: #57534E;
+  background: #F3ECE0;
+  border: 1px solid #1C1917;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.vocab-card-body {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #1C1917;
+}
+
+.vocab-meaning-hidden {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-sakura);
+  font-size: 13px;
+  font-weight: 700;
+  background: #FCE7EB;
+  border: 1px dashed var(--accent-sakura);
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.vocab-meaning-text {
+  color: #1C1917;
 }
 
 .markdown-content hr {

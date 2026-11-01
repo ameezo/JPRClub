@@ -13,10 +13,6 @@ export default function Navbar() {
     setIsOpen(false);
   }, [location.pathname]);
 
-  // Only pages with dark hero header have dark navbar (white text); all other pages have light navbar (dark text)
-  const isStudioDetail = location.pathname.startsWith('/studio/') && location.pathname.replace(/\/$/, '') !== '/studio';
-  const isDarkHero = location.pathname === '/' || isStudioDetail;
-
   const isAr = i18n.language === 'ar';
 
   const [currentUser, setCurrentUser] = useState<any>(() => {
@@ -47,56 +43,82 @@ export default function Navbar() {
   const dashboardLink = currentUser?.role === 'admin' || currentUser?.role === 'organizer' ? '/admin' : '/dashboard';
 
   return (
-    <nav className={`site-nav ${isDarkHero ? 'dark' : 'light'} ${isOpen ? 'menu-open' : ''}`}>
-      <div className="logo">
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit' }}>
-          <img src="/logo.jpeg" alt="JPR Club Logo" />
-          <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '0.02em', color: 'inherit' }}>JPR Club</span>
-        </Link>
-      </div>
-      
-      <button 
-        className="mobile-menu-btn"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label="Toggle menu"
-      >
-        {isOpen ? '✕' : '☰'}
-      </button>
-      
-      <div className="nav-links">
-        <NavLink to="/sessions" className={({ isActive }) => isActive ? 'active' : ''}>
-          {t('nav.sessions')}
-        </NavLink>
-        <NavLink to="/studio" className={({ isActive }) => isActive ? 'active' : ''}>
-          {t('nav.studio')}
-        </NavLink>
-        <NavLink to="/gallery" className={({ isActive }) => isActive ? 'active' : ''}>
-          {t('nav.gallery')}
-        </NavLink>
-        <NavLink to="/resources" className={({ isActive }) => isActive ? 'active' : ''}>
-          {t('nav.resources')}
-        </NavLink>
-        <NavLink to="/journal" className={({ isActive }) => isActive ? 'active' : ''}>
-          {t('nav.journal')}
-        </NavLink>
-      </div>
-      <div className="nav-actions controls">
-        {isAuth ? (
-          <Link 
-            to={dashboardLink} 
-            className="nav-register-btn nav-user-btn"
-            title={`${currentUser.name || 'Member'} (${currentUser.role || 'member'})`}
+    <header className="site-header-wrapper">
+      <nav className={`site-nav ${isOpen ? 'menu-open' : ''}`}>
+        {/* Brand Hanko Stamp Logo */}
+        <div className="nav-brand">
+          <Link to="/" className="nav-logo-link">
+            <div className="logo-hanko">
+              <img src="/logo.jpeg" alt="JPR Club Logo" />
+            </div>
+            <div className="logo-text">
+              <span className="logo-title">JPR Club</span>
+              <span className="logo-kanji">読書会</span>
+            </div>
+          </Link>
+        </div>
+
+        <button 
+          className="mobile-menu-btn"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle menu"
+        >
+          {isOpen ? '✕' : '☰'}
+        </button>
+
+        {/* Navigation Links */}
+        <div className="nav-links">
+          <NavLink 
+            to="/sessions" 
+            className={({ isActive }) => `nav-link-pill ${isActive ? 'active' : ''}`}
           >
-            <span style={{ fontSize: '0.9rem', marginRight: isAr ? 0 : '6px', marginLeft: isAr ? '6px' : 0 }}>👤</span>
-            <span>{currentUser.name || (isAr ? 'لوحة التحكم' : 'Dashboard')}</span>
-          </Link>
-        ) : (
-          <Link to="/register" className="nav-register-btn">
-            {isAr ? 'التسجيل' : 'Register'}
-          </Link>
-        )}
-        <LanguageToggle />
-      </div>
-    </nav>
+            {t('nav.sessions')}
+          </NavLink>
+          <NavLink 
+            to="/studio" 
+            className={({ isActive }) => `nav-link-pill ${isActive ? 'active' : ''}`}
+          >
+            {t('nav.studio')}
+          </NavLink>
+          <NavLink 
+            to="/gallery" 
+            className={({ isActive }) => `nav-link-pill ${isActive ? 'active' : ''}`}
+          >
+            {t('nav.gallery')}
+          </NavLink>
+          <NavLink 
+            to="/resources" 
+            className={({ isActive }) => `nav-link-pill ${isActive ? 'active' : ''}`}
+          >
+            {t('nav.resources')}
+          </NavLink>
+          <NavLink 
+            to="/journal" 
+            className={({ isActive }) => `nav-link-pill ${isActive ? 'active' : ''}`}
+          >
+            {t('nav.journal')}
+          </NavLink>
+        </div>
+
+        {/* Action Controls */}
+        <div className="nav-actions controls">
+          {isAuth ? (
+            <Link 
+              to={dashboardLink} 
+              className="tactile-btn nav-btn-user"
+              title={`${currentUser.name || 'Member'} (${currentUser.role || 'member'})`}
+            >
+              <span style={{ fontSize: '0.95rem' }}>👤</span>
+              <span>{currentUser.name || (isAr ? 'لوحة التحكم' : 'Dashboard')}</span>
+            </Link>
+          ) : (
+            <Link to="/register" className="tactile-btn tactile-btn-primary nav-btn-register">
+              {isAr ? 'انضم إلينا' : 'Register'}
+            </Link>
+          )}
+          <LanguageToggle />
+        </div>
+      </nav>
+    </header>
   );
 }
